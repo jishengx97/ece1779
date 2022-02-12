@@ -9,9 +9,12 @@
 # Uncomment this line when copied to the home directory
 # cd ~/ece1779/
 
-echo "> Pulling newest updates from repository"
-git checkout -f
-git pull
+# Default to not pulling from git because it's getting annoying :)
+if [ "$1" -ne "pull_latest" ]; then
+    echo "> Pulling newest updates from repository"
+    git checkout -f
+    git pull
+fi
 
 echo "> Starting virtual environment and installing new packages"
 python3 -m venv venv
@@ -19,8 +22,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Kill any process that's sitting on the ports now
-lsof -i tcp:5000 | awk 'NR!=1 {print $2}' | xargs kill
-lsof -i tcp:5001 | awk 'NR!=1 {print $2}' | xargs kill
+pkill gunicorn
 
 echo "> Starting the memcache app on port 5001"
 gunicorn --bind 0.0.0.0:5001 --workers=1 run_memcacheapp:webapp &> memcacheapp_log.txt &
