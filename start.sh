@@ -23,7 +23,7 @@ sudo kill -9 `sudo lsof -t -i:5000`
 sudo kill -9 `sudo lsof -t -i:5001`
 
 echo "> Starting the memcache app on port 5001"
-gunicorn --bind 0.0.0.0:5001 --workers=1 memcacheapp:webapp &> memcacheapp_log.txt &
+gunicorn --bind 0.0.0.0:5001 --workers=1 run_memcacheapp:webapp &> memcacheapp_log.txt &
 
 echo "> Starting the frontend app on port 5000"
-gunicorn --bind 0.0.0.0:5000 --workers=1 frontendapp:webapp &> frontendapp_log.txt &
+gunicorn --bind 0.0.0.0:5000 --workers=1 run_frontendapp:webapp &> frontendapp_log.txt &
