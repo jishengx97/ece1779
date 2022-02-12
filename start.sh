@@ -10,7 +10,7 @@
 # cd ~/ece1779/
 
 # Default to not pulling from git because it's getting annoying :)
-if [ "$1" -ne "pull_latest" ]; then
+if [ "$1" = "pull_latest" ]; then
     echo "> Pulling newest updates from repository"
     git checkout -f
     git pull
