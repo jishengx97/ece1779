@@ -4,7 +4,6 @@ from frontendapp import webapp
 from flask import json
 
 
-@webapp.route('/')
+@webapp.route('/',methods=['GET'])
 def main():
-    return render_template("main.html")
-
+    return render_template("main.html",title = "Main")

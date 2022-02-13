@@ -1,11 +1,12 @@
-<!DOCTYPE html>
-<head>
-    <title>Very simple front end</title>
-</head>
-<html>
-    <body>
+{% extends "base.html" %}
+{% block content %}
 
-        Hello World!
+    <ul>
+        <li><a href="{{url_for('upload_form')}}">upload image</a></li>
+        <li><a href="{{url_for('get_form')}}">get image</a></li>
+        <li><a href="{{url_for('main')}}">display all keys</a></li>
+        <li><a href="{{url_for('main')}}">change memcache config</a></li>
+        <li><a href="{{url_for('main')}}">display memcache stats</a></li>
+    </ul>
 
-    <body>    
-</html>
+{% endblock %}
