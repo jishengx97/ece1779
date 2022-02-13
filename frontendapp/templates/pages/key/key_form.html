@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
+    <div class="error">{{error_msg if error_msg != None}}</div>
 
     <ul>
         <li><a href="{{url_for('main')}}">main</a></li>
     </ul>
 
+    <form action="{{url_for('key_save')}}" method="post">
+        KEY <input type="string" name="key_input"><br/>
+        <input type="submit">
+        <input type="reset">
+    </form>
 {% endblock %}
