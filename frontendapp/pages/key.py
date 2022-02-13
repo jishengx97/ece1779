@@ -3,6 +3,6 @@ from frontendapp import webapp
 from flask import json
 
 
-@webapp.route('/api/key',methods=['GET'])
+@webapp.route('/key',methods=['GET'])
 def key_form():
-    return render_template("api/key/key_form.html",title = "KEY")
+    return render_template("pages/key/key_form.html",title = "KEY")

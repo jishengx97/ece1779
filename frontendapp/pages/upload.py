@@ -3,6 +3,6 @@ from frontendapp import webapp
 from flask import json
 
 
-@webapp.route('/api/upload',methods=['GET'])
+@webapp.route('/upload',methods=['GET'])
 def upload_form():
-    return render_template("api/upload/upload_form.html",title = "UPLOAD")
+    return render_template("pages/upload/upload_form.html",title = "UPLOAD")
