@@ -15,7 +15,8 @@ def get():
 
     if key in memcache:
         memcache.move_to_end(key)
-        value = memcache[key]
+        # value = memcache[key]
+        value = base64.b64encode(memcache[key]).decode('utf-8')
         response = webapp.response_class(
             response=json.dumps(value),
             status=200,
