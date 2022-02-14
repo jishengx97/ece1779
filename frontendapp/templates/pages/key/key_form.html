@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="error">{{error_msg if error_msg != None}}</div>
+    <div class="error">
+        {{error_msg if error_msg != None}}
+    </div>
 
     <ul>
         <li><a href="{{url_for('main')}}">main</a></li>
@@ -11,4 +13,7 @@
         <input type="submit">
         <input type="reset">
     </form>
+        {% if img != None %}
+            <img src="data:image/jpeg;base64,{{ img }}" alt="User Image"><br>
+        {% endif %}
 {% endblock %}
