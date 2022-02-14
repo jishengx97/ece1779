@@ -11,14 +11,30 @@
             <input type="submit" value="get" />
         </form>
 
-        <form action="{{ url_for('put')}}" method="post">
+        <form action="{{ url_for('put')}}" method="post" enctype="multipart/form-data">
             <label>key:</label>
             <input type="text" name="key" />
-            <label>value:</label>
-            <input type="text" name="value" />
+            
+
+            <input type="file" name="image" id="image">
             <input type="submit" value="put" />
+
+            
         </form>
 
+        <form action="{{ url_for('drop')}}" method="post">
+            <label>key:</label>
+            <input type="text" name="key" />
+            <input type="submit" value="drop" />
+        </form>
+
+        <form action="{{ url_for('listall')}}" method="post">
+            <input type="submit" value="list all" />
+        </form>
+
+        <form action="{{ url_for('clear')}}" method="post">
+            <input type="submit" value="clear" />
+        </form>
 
     <body>    
 </html>
