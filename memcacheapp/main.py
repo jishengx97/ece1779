@@ -2,6 +2,7 @@
 from flask import render_template, url_for, request
 from memcacheapp import webapp, memcache,capacity,policy
 from flask import json
+from common import models
 import random
 import base64
 
