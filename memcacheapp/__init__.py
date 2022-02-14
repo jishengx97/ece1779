@@ -10,6 +10,10 @@ database.init_db()
 
 webapp.db_session = scoped_session(database.SessionLocal)
 
+# initialzes the database and populates them with default values if necessary
+from memcacheapp import initialize_db
+initialize_db.set_db_default_values()
+
 memcache = OrderedDict()
 capacity  =  5
 policy = 'LRU'
