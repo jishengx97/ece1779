@@ -3,7 +3,6 @@ A1: web development
 
 To run on EC2:
 
-        chmod 777 start.sh
         # To run without pulling the latest changes
         ./start.sh
         # To pull the latest changes from the repository, and then run
