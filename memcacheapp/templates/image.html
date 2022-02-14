@@ -4,8 +4,9 @@
     <title>Index</title>
 </head>
 <body>
-    {% for im in user_image %}
-        <img src="data:image/jpeg;base64,{{ im }}" alt="User Image"><br>
+    {% for item in memcache_contents %}
+        <label>{{item[0]}}</label>
+        <img src="data:image/jpeg;base64,{{ item[1] }}" alt="User Image"><br>
     {% endfor %}
     
 </body>

@@ -22,10 +22,10 @@
             
         </form>
 
-        <form action="{{ url_for('drop')}}" method="post">
+        <form action="{{ url_for('invalidateKey')}}" method="post">
             <label>key:</label>
             <input type="text" name="key" />
-            <input type="submit" value="drop" />
+            <input type="submit" value="invalidateKey" />
         </form>
 
         <form action="{{ url_for('listall')}}" method="post">
@@ -34,6 +34,18 @@
 
         <form action="{{ url_for('clear')}}" method="post">
             <input type="submit" value="clear" />
+        </form>
+
+        <form action="{{ url_for('size')}}" method="post">
+            <input type="submit" value="check current size" />
+        </form>
+
+        <form action="{{ url_for('stats')}}" method="post">
+            <input type="submit" value="check current stats" />
+        </form>
+
+        <form action="{{ url_for('refreshConfiguration')}}" method="post">
+            <input type="submit" value="refreshConfiguration" />
         </form>
 
     <body>    

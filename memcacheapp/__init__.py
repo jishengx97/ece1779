@@ -15,8 +15,13 @@ from memcacheapp import initialize_db
 initialize_db.set_db_default_values()
 
 memcache = OrderedDict()
-capacity  =  5
+capacity  =  2
 policy = 'LRU'
+current_size = 0
+num_item = 0
+num_request = 0
+num_miss = 0
+num_access = 0
 from memcacheapp import main
 
 
