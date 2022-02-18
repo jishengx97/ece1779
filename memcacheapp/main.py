@@ -7,6 +7,8 @@ import random
 import base64
 import sys
 from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
+from pytz import timezone
 
 def print_cache_stats():
     msg = ''
@@ -18,15 +20,34 @@ def print_cache_stats():
     msg += "num_miss: " + str(num_miss) + ".    "
     msg += "num_access: " + str(num_access) + ".    "
 
+    # Miss rate and hit rate in percentage
+    if num_request > 0:
+        miss_rate = num_miss / num_request * 100
+        hit_rate = (num_request - num_miss) / num_request * 100
+    else:
+        miss_rate = 0.0
+        hit_rate = 0.0
+    msg += "miss rate: " + str(miss_rate) + "%.    "
+    msg += "hit rate: " + str(hit_rate) + "%.    "
+
+    eastern = timezone('US/Eastern')
+    current_time = datetime.now(eastern)
+    msg += "curent time: " + current_time.strftime("%X") + ".    "
     print(msg)
 
-
+    new_entry = models.MemcacheStats(
+        num_items = num_item,
+        total_size = current_size,
+        num_requests_served = num_request,
+        miss_rate = miss_rate,
+        hit_rate = hit_rate,
+        stats_timestamp = current_time
+    )
+    webapp.db_session.add(new_entry)
+    webapp.db_session.commit()
 
 @webapp.route('/')
 def main():
-    scheduler = BackgroundScheduler(timezone="America/Chicago")
-    scheduler.add_job(func=print_cache_stats, trigger="interval", seconds=5)
-    scheduler.start()
 
     return render_template("main.html")
 

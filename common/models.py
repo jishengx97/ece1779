@@ -1,6 +1,6 @@
 
 
-from sqlalchemy import Column, Integer, Float, String, Sequence
+from sqlalchemy import Column, Integer, Float, String, Time
 from .database import Base
 
 class MemcacheConfig(Base):
@@ -10,8 +10,8 @@ class MemcacheConfig(Base):
     __tablename__ = 'memcache_configuration'
     id = Column(
         Integer, 
-        Sequence('user_id_seq'),
-        primary_key=True
+        primary_key=True,
+        autoincrement=True
     )
     capacity_in_mb = Column(
         Float,
@@ -19,5 +19,37 @@ class MemcacheConfig(Base):
     )
     replacement_policy = Column(
         String(120),
+        nullable=False
+    )
+
+class MemcacheStats(Base):
+    __tablename__ = 'memcache_stats'
+    id = Column(
+        Integer, 
+        primary_key=True,
+        autoincrement=True
+    )
+    num_items = Column(
+        Integer,
+        nullable=False
+    )
+    total_size = Column(
+        Float,
+        nullable=False
+    )
+    num_requests_served = Column(
+        Integer,
+        nullable=False
+    )
+    miss_rate = Column(
+        Float,
+        nullable=False
+    )
+    hit_rate = Column(
+        Float,
+        nullable=False
+    )
+    stats_timestamp = Column(
+        Time,
         nullable=False
     )

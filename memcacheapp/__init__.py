@@ -2,6 +2,8 @@ from flask import Flask
 from sqlalchemy.orm import scoped_session
 from common import database
 from collections import OrderedDict
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 global memcache
 
 webapp = Flask(__name__)
@@ -24,6 +26,9 @@ num_miss = 0
 num_access = 0
 from memcacheapp import main
 
+scheduler = BackgroundScheduler(timezone='US/Eastern')
+scheduler.add_job(func=main.print_cache_stats, trigger="interval", seconds=5)
+scheduler.start()
+bg_scheduler_started = True
 
-
-
+atexit.register(lambda: scheduler.shutdown())
