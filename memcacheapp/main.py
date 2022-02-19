@@ -186,14 +186,14 @@ def clear():
 @webapp.route('/invalidateKey',methods=['POST'])
 def invalidateKey():
     global num_request
-    global num_access
-    global num_miss
+    # global num_access
+    # global num_miss
     global num_item
     global current_size
 
     key = request.form.get('key')
     num_request += 1
-    num_access += 1
+    # num_access += 1
     if key in memcache:
         value = memcache[key]
         current_size -= sys.getsizeof(value)
@@ -205,7 +205,7 @@ def invalidateKey():
             mimetype='application/json'
         )
     else:
-        num_miss += 1
+        # num_miss += 1
         response = webapp.response_class(
             response=json.dumps("Unknown key"),
             status=400,
