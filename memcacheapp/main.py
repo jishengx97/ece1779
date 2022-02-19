@@ -82,8 +82,8 @@ def get():
 @webapp.route('/put',methods=['POST'])
 def put():
     global num_request
-    global num_access
-    global num_miss
+    # global num_access
+    # global num_miss
     global num_item
     global current_size
 
@@ -101,14 +101,15 @@ def put():
 
         return response
     
-    num_access += 1
+    # num_access += 1
     if key in memcache:
         #update entry
         
         old_size = sys.getsizeof(memcache[key])
         
         if current_size - old_size + new_size > capacity * 1024 * 1024:
-            # need replacement\
+            # new image is larger than old image and need to eject more image more space to save new image
+            # need replacement
             #delete current key's value first
             memcache.pop(key)
             current_size -= old_size
@@ -122,7 +123,7 @@ def put():
                     current_size -= sys.getsizeof(memcache[removekey])
                     memcache.pop(removekey)
                     num_item -= 1
-            # memcache.move_to_end(key)
+            #insert new image
             memcache[key] = value
             current_size = current_size + new_size
         else:
@@ -130,8 +131,8 @@ def put():
             memcache.move_to_end(key)
             memcache[key] = value
             current_size = current_size - old_size + new_size
-    else:
-        num_miss += 1
+    else: #insert new key
+        # num_miss += 1
         if current_size + new_size > capacity * 1024 * 1024:
             ##replace
             while current_size + new_size > capacity * 1024 * 1024:
@@ -215,13 +216,12 @@ def invalidateKey():
 
 @webapp.route('/refreshConfiguration',methods=['POST'])
 def refreshConfiguration():
-    # memcache[key] = value
-    # for key, value in memcache.items():
     global policy
     global capacity
 
-    policy = 'LRU'
-    capacity = 2
+    obj = webapp.db_session.query(models.MemcacheConfig).first()
+    policy = obj.replacement_policy
+    capacity = obj.capacity_in_mb
 
     response = webapp.response_class(
         response=json.dumps("OK"),
