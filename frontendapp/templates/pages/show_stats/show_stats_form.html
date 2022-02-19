@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <ul>
+        <li><a href="{{url_for('main')}}">main</a></li>
+    </ul>
+
+    {% if img != None %}
+        <img src="data:image/png;base64,{{ img }}" alt="User Image"><br>
+    {% endif %}
+
+{% endblock %}

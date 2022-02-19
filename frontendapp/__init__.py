@@ -13,6 +13,4 @@ from frontendapp import initialize_db
 initialize_db.set_db_default_values()
 
 from frontendapp import main
-from frontendapp.pages import upload
-from frontendapp.pages import key
-from frontendapp.pages import list_keys
+from frontendapp.pages import upload, key, list_keys, show_stats
