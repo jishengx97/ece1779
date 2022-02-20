@@ -16,13 +16,13 @@ if [ "$1" = "pull_latest" ]; then
     git pull
 fi
 
+# Kill any process that's sitting on the ports now
+pkill gunicorn
+
 echo "> Starting virtual environment and installing new packages"
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
-# Kill any process that's sitting on the ports now
-pkill gunicorn
 
 echo "> Starting the memcache app on port 5001"
 gunicorn --bind 0.0.0.0:5001 --workers=1 run_memcacheapp:webapp &> memcacheapp_log.txt &
