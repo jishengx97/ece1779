@@ -16,8 +16,9 @@ if [ "$1" = "pull_latest" ]; then
     git pull
 fi
 
-# Kill any process that's sitting on the ports now
-pkill gunicorn
+# Properly kill gunicorn processes that are still running
+kill -9 `ps aux | grep gunicorn | grep run_frontendapp | awk '{print $2}'`
+kill -9 `ps aux | grep gunicorn | grep run_memcacheapp | awk '{print $2}'`
 
 echo "> Starting virtual environment and installing new packages"
 python3 -m venv venv
