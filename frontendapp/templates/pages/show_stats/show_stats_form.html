@@ -1,12 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
-
+    <!-- <meta http-equiv="refresh" content="5"/> -->
     <ul>
         <li><a href="{{url_for('main')}}">main</a></li>
     </ul>
 
-    {% if img != None %}
-        <img src="data:image/png;base64,{{ img }}" alt="User Image"><br>
+    {% if num_items_img != None %}
+        <img src="data:image/png;base64,{{ num_items_img }}" alt="Stats Plot for Number of Items"><br>
+    {% endif %}
+
+    {% if total_size_img != None %}
+        <img src="data:image/png;base64,{{ total_size_img }}" alt="Stats Plot for Total Size"><br>
+    {% endif %}
+
+    {% if num_requests_served_img != None %}
+        <img src="data:image/png;base64,{{ num_requests_served_img }}" alt="Stats Plot for Number of Requests Served"><br>
+    {% endif %}
+
+    {% if miss_rate_img != None %}
+        <img src="data:image/png;base64,{{ miss_rate_img }}" alt="Stats Plot for Missrate"><br>
+    {% endif %}
+
+    {% if hit_rate_img != None %}
+        <img src="data:image/png;base64,{{ hit_rate_img }}" alt="Stats plot for Hitrate"><br>
     {% endif %}
 
 {% endblock %}

@@ -3,6 +3,7 @@ from sqlalchemy.orm import scoped_session
 from common import database
 
 webapp = Flask(__name__)
+webapp.url_map.strict_slashes = False
 
 database.init_db()
 
