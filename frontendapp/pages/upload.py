@@ -70,7 +70,7 @@ def upload_save():
 def test_upload():
     key_input = request.form['key']
     if key_input == "":
-        data = {"success": "false", "error": {"code" : "servererrorcode", "message":"key is missing."}}
+        data = {"success": "false", "error": {"code" : "400", "message":"key is missing."}}
         response = webapp.response_class(
                 response=json.dumps(data),
                 status=400,
@@ -78,7 +78,7 @@ def test_upload():
             )
         return response
     if 'file' not in request.files:
-        data = {"success": "false","error": {"code" : "servererrorcode", "message":"file is missing."}}
+        data = {"success": "false","error": {"code" : "400", "message":"file is missing."}}
         response = webapp.response_class(
                 response=json.dumps(data),
                 status=400,
@@ -87,7 +87,7 @@ def test_upload():
         return response
     new_file = request.files['file']
     if new_file.filename == '':
-        data = {"success": "false","error": {"code" : "servererrorcode", "message":"file is missing."}}
+        data = {"success": "false","error": {"code" : "400", "message":"file is missing."}}
         response = webapp.response_class(
                 response=json.dumps(data),
                 status=400,

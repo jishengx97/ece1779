@@ -58,7 +58,7 @@ def test_key(key_value):
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_value)
         if result.count() == 0:
             error_msg = "KEY DID NOT EXIST"
-            data = {"error": {"code" : "servererrorcode", "message":"key does not exist."},
+            data = {"error": {"code" : "400", "message":"key does not exist."},
                     "success":"false"}
             response = webapp.response_class(
                 response=json.dumps(data),
@@ -73,6 +73,15 @@ def test_key(key_value):
         r = requests.post("http://127.0.0.1:5001/put", data={'key':key_value}, files={'image':img_binary1})
         img_binary1.close()
         img_binary2.close()
+        if r.status_code != 200:
+            data = {"error": {"code" : "400", "message":"image size is larger than cache capacity."},
+                    "success":"false"}
+            response = webapp.response_class(
+                response=json.dumps(data),
+                status=400,
+                mimetype='application/json'
+            )
+            return response
     data = {"success":"true",
             "content":img}
     response = webapp.response_class(
