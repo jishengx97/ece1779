@@ -10,7 +10,18 @@
     </ul>
 
     <form action="{{url_for('config_save')}}" method="post">
-        CAPACITY <input type="string" name="capacity_input"><br/>
+        CAPACITY <input type="string" name="capacity_input" value = "{{ init_capacity }}"><br/>
+        POLICY
+        <select name="policy_input" selected="LRU">
+            {% for policy in policys %}
+                {% if policy == init_policy %}
+                    <option value="{{ policy }}" SELECTED>{{ policy }}</option>
+                {% else %}
+                    <option value="{{ policy }}" >{{ policy }}</option>
+                {% endif %}
+            {% endfor %}     
+        </select>
+        <br/>
         <input type="submit">
         <input type="reset">
     </form>
