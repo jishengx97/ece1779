@@ -26,7 +26,8 @@ def upload_save():
         error_msg = "Missing file name"
         return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
 
-    result = webapp.db_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
+    local_session = webapp.db_session()
+    result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
     if(result.count() == 1):
         # key exists, update file, send invalidate request
         r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
@@ -36,10 +37,10 @@ def upload_save():
             key = key_input,
             file_location = "file_location"
         )
-        webapp.db_session.add(new_entry)
-        webapp.db_session.commit()
+        local_session.add(new_entry)
+        local_session.commit()
         # must refresh before accessing
-        webapp.db_session.refresh(new_entry)
+        local_session.refresh(new_entry)
         print(new_entry.id)
         # use new_entry.id here
 

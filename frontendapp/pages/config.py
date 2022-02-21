@@ -14,7 +14,8 @@ def is_float(element):
 
 @webapp.route('/config',methods=['GET'])
 def config_form():
-    obj = webapp.db_session.query(models.MemcacheConfig).first()
+    local_session = webapp.db_session()
+    obj = local_session.query(models.MemcacheConfig).first()
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
     return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = None)
@@ -23,7 +24,8 @@ def config_form():
 def config_save():
     error_msg = None
 
-    obj = webapp.db_session.query(models.MemcacheConfig).first()
+    local_session = webapp.db_session()
+    obj = local_session.query(models.MemcacheConfig).first()
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
 
@@ -42,7 +44,7 @@ def config_save():
     
     obj.capacity_in_mb = capacity_input
     obj.replacement_policy = policy_input
-    webapp.db_session.commit()
+    local_session.commit()
 
     r = requests.post("http://127.0.0.1:5001/refreshConfiguration")
 

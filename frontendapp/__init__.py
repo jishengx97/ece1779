@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
 from common import database
 
@@ -7,7 +7,7 @@ webapp.url_map.strict_slashes = False
 
 database.init_db()
 
-webapp.db_session = scoped_session(database.SessionLocal)
+webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
 # initialzes the database and populates them with default values if necessary
 from frontendapp import initialize_db

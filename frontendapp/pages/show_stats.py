@@ -13,16 +13,21 @@ import math
 
 @webapp.route('/show_stats',methods=['GET', 'POST'])
 def show_stats():
-    num_stats_entries = webapp.db_session.query(models.MemcacheStats).count()
+    print("before_stats_query")
+    local_session = webapp.db_session()
+    num_stats_entries = local_session.query(models.MemcacheStats).count()
 
     if (num_stats_entries == 0):
         return render_template("pages/show_stats/show_stats_form.html", title = "STATS", error_msg = "No stats available yet!")
     # Either get all entries from the database, or get entries for the last 10 minutes,
     # which is 60 / 5 * 10 = 120 entries
     num_entried_needed = min(num_stats_entries, 120)
-    results = webapp.db_session.query(models.MemcacheStats).order_by(models.MemcacheStats.id.desc()).limit(num_entried_needed)
+    results = local_session.query(models.MemcacheStats).order_by(models.MemcacheStats.id.desc()).limit(num_entried_needed).all()
+    # results = statements.statement.execute().fetchall()
+    
     # Reverse to get sequence in time
     results = results[::-1]
+    # local_session.remove()
 
     # prepare data to generate figures
     num_items = []
@@ -38,6 +43,9 @@ def show_stats():
         miss_rate.append(item.miss_rate)
         hit_rate.append(item.hit_rate)
         stats_timestamp.append(item.stats_timestamp.strftime("%X"))
+    
+    print("after_stats_query")
+    local_session.rollback()
     # print (num_items)
     # print (total_size)
     # print (num_requests_served)

@@ -14,3 +14,7 @@ def disable_cache(response):
     response.cache_control.max_age = 0
     response.cache_control.public = True
     return response
+
+@webapp.teardown_appcontext
+def teardown_db(exception=None):
+    webapp.db_session.remove()

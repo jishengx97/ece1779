@@ -35,6 +35,7 @@ def print_cache_stats():
     msg += "curent time: " + current_time.strftime("%X") + ".    "
     print(msg)
 
+    local_session = webapp.db_session()
     new_entry = models.MemcacheStats(
         num_items = num_item,
         total_size = current_size,
@@ -43,8 +44,8 @@ def print_cache_stats():
         hit_rate = hit_rate,
         stats_timestamp = current_time
     )
-    webapp.db_session.add(new_entry)
-    webapp.db_session.commit()
+    local_session.add(new_entry)
+    local_session.commit()
 
 @webapp.route('/')
 def main():
@@ -219,7 +220,8 @@ def refreshConfiguration():
     global policy
     global capacity
 
-    obj = webapp.db_session.query(models.MemcacheConfig).first()
+    local_session = webapp.db_session()
+    obj = local_session.query(models.MemcacheConfig).first()
     policy = obj.replacement_policy
     capacity = obj.capacity_in_mb
 
@@ -269,3 +271,7 @@ def stats():
     )
 
     return response
+
+@webapp.teardown_appcontext
+def teardown_db(exception=None):
+    webapp.db_session.remove()

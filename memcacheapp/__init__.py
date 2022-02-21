@@ -1,6 +1,6 @@
-from flask import Flask
+from flask import Flask, _app_ctx_stack
 from sqlalchemy.orm import scoped_session
-from common import database
+from common import database, models
 from collections import OrderedDict
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
@@ -10,15 +10,17 @@ webapp = Flask(__name__)
 
 database.init_db()
 
-webapp.db_session = scoped_session(database.SessionLocal)
+webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
 # initialzes the database and populates them with default values if necessary
 from memcacheapp import initialize_db
 initialize_db.set_db_default_values()
 
+local_session = webapp.db_session()
+config_result = local_session.query(models.MemcacheConfig).first()
 memcache = OrderedDict()
-capacity  =  2
-policy = 'LRU'
+capacity  =  config_result.capacity_in_mb 
+policy = config_result.replacement_policy
 current_size = 0
 num_item = 0
 num_request = 0
