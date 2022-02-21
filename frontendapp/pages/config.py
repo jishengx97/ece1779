@@ -34,7 +34,7 @@ def config_save():
 
     capacity_input = float(capacity_input)
     
-    if capacity_input == init_capacity and policy_input == init_capacity:
+    if capacity_input == init_capacity and policy_input == init_policy:
         error_msg = "Error nothing changed"
         return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     # if capacity_input == "":
