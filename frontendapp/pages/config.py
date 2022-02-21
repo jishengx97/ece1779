@@ -29,6 +29,13 @@ def config_save():
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
 
+    if (request.form['action'] == 'clear cache'):
+        r = requests.post("http://127.0.0.1:5001/clear")
+        if r.status_code == 200:
+            error_msg = "SUCCESS CACHE CLEAR"
+        else:
+            error_msg = r.json() 
+        return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     capacity_input = request.form.get("capacity_input")
     policy_input = request.form.get('policy_input')
 

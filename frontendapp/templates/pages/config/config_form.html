@@ -10,6 +10,7 @@
     </ul>
 
     <form action="{{url_for('config_save')}}" method="post">
+        <input type="submit" name="action" value = "clear cache"><br/>
         CAPACITY <input type="string" name="capacity_input" value = "{{ init_capacity }}"><br/>
         POLICY
         <select name="policy_input" selected="LRU">
@@ -22,7 +23,7 @@
             {% endfor %}     
         </select>
         <br/>
-        <input type="submit">
+        <input type="submit" name="action">
         <input type="reset">
     </form>
 {% endblock %}
