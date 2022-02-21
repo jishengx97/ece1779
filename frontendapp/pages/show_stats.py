@@ -161,4 +161,6 @@ def get_html_decoded_figure_all_in_one(x_axis, y_axes, titles, xlabels, ylabels)
     num_items_figure.savefig(output, format='png',bbox_inches='tight')
     output.seek(0)
     figdata_png = base64.b64encode(output.getvalue())
-    return figdata_png.decode('utf8')
+    decoded = figdata_png.decode('utf8')
+    plt.close(num_items_figure)
+    return decoded
