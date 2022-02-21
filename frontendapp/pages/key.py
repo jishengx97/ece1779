@@ -42,7 +42,3 @@ def key_save():
         if r.status_code != 200:
             error_msg = r.json()
     return render_template("pages/key/key_form.html", title = "KEY", error_msg = error_msg, img = img, img_file = img_file)
-
-@webapp.route('/key/<filename>')
-def send_img(filename):
-    return send_from_directory("/home/ubuntu/ece1779/images/",filename)
