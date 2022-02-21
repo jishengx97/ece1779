@@ -21,9 +21,9 @@ def print_cache_stats():
     msg += "num_access: " + str(num_access) + ".    "
 
     # Miss rate and hit rate in percentage
-    if num_request > 0:
-        miss_rate = num_miss / num_request * 100
-        hit_rate = (num_request - num_miss) / num_request * 100
+    if num_access > 0:
+        miss_rate = num_miss / num_access * 100
+        hit_rate = (num_request - num_miss) / num_access * 100
     else:
         miss_rate = 0.0
         hit_rate = 0.0
