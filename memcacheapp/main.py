@@ -1,6 +1,6 @@
 
 from flask import render_template, url_for, request
-from memcacheapp import webapp, memcache,capacity,policy,current_size,num_item,num_request,num_miss,num_access
+from memcacheapp import webapp, memcache,capacity,policy,current_size,num_item,num_request,num_miss,num_access,lock
 from flask import json
 from common import models
 import random
@@ -11,6 +11,9 @@ from datetime import datetime
 from pytz import timezone
 
 def print_cache_stats():
+    global num_request
+    global num_access
+    global num_miss
     msg = ''
     msg += "Capacity: " + str(capacity) + " MB" + ".    "
     msg += "current_size: " + str(current_size) + " bytes"+ ".  "
@@ -47,6 +50,15 @@ def print_cache_stats():
     local_session.add(new_entry)
     local_session.commit()
 
+    lock.acquire()
+    try:
+        num_miss = 0
+        num_access = 0
+        num_request = 0
+    finally:
+        lock.release()
+
+
 @webapp.route('/')
 def main():
 
@@ -59,8 +71,14 @@ def get():
     global num_miss
 
     key = request.form.get('key')
-    num_request += 1
-    num_access += 1
+
+    lock.acquire()
+    try:
+        num_request += 1
+        num_access += 1
+    finally:
+        lock.release()
+    
     if key in memcache:
         memcache.move_to_end(key)
         # value = memcache[key]
@@ -71,7 +89,11 @@ def get():
             mimetype='application/json'
         )
     else:
-        num_miss += 1
+        lock.acquire()
+        try:
+            num_miss += 1
+        finally:
+            lock.release()
         response = webapp.response_class(
             response=json.dumps("Unknown key"),
             status=400,
@@ -91,7 +113,12 @@ def put():
     key = request.form.get('key')
     value = request.files['image'].read()
     new_size = sys.getsizeof(value)
-    num_request += 1
+    
+    lock.acquire()
+    try:
+        num_request += 1
+    finally:
+        lock.release()
     # if image is larger than capacity
     if new_size > capacity * 1024 * 1024:
         response = webapp.response_class(
@@ -171,14 +198,17 @@ def clear():
     global num_request
     global current_size
     global num_item
-
-    num_request += 1
+    lock.acquire()
+    try:
+        num_request += 1
+        current_size = 0   
+        num_item = 0
+    finally:
+        lock.release()
     memcache.clear()     
-    current_size = 0   
-    num_item = 0
     response = webapp.response_class(
         response=json.dumps("OK"),
-        status=200,
+        status=200, 
         mimetype='application/json'
     )
 
@@ -193,7 +223,11 @@ def invalidateKey():
     global current_size
 
     key = request.form.get('key')
-    num_request += 1
+    lock.acquire()
+    try:
+        num_request += 1
+    finally:
+        lock.release()
     # num_access += 1
     if key in memcache:
         value = memcache[key]
@@ -219,7 +253,12 @@ def invalidateKey():
 def refreshConfiguration():
     global policy
     global capacity
-
+    global num_request
+    lock.acquire()
+    try:
+        num_request += 1
+    finally:
+        lock.release()
     local_session = webapp.db_session()
     obj = local_session.query(models.MemcacheConfig).first()
     policy = obj.replacement_policy

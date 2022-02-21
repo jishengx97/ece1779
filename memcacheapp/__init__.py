@@ -3,6 +3,7 @@ from sqlalchemy.orm import scoped_session
 from common import database, models
 from collections import OrderedDict
 from apscheduler.schedulers.background import BackgroundScheduler
+from multiprocessing import Lock
 import atexit
 global memcache
 
@@ -26,6 +27,7 @@ num_item = 0
 num_request = 0
 num_miss = 0
 num_access = 0
+lock = Lock()
 from memcacheapp import main
 
 scheduler = BackgroundScheduler(timezone='US/Eastern')
