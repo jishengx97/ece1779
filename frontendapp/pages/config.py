@@ -2,6 +2,8 @@ from flask import render_template, url_for, request
 from frontendapp import webapp
 from flask import json
 from common import models
+import requests
+
 def is_float(element):
     try:
         float(element)
@@ -37,17 +39,16 @@ def config_save():
     if capacity_input == init_capacity and policy_input == init_policy:
         error_msg = "Error nothing changed"
         return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
-    # if capacity_input == "":
-    #     error_msg = "Missing key"
-    #     return render_template("pages/key/key_form.html",title = "KEY",error_msg = error_msg, img = None)
+    
+    obj.capacity_in_mb = capacity_input
+    obj.replacement_policy = policy_input
+    webapp.db_session.commit()
 
-    # r = requests.post("http://127.0.0.1:5001/get", data={'key':key_input})
+    r = requests.post("http://127.0.0.1:5001/refreshConfiguration")
 
-    # if r.status_code == 200:
-    #     error_msg = "KEY SUCCESS"
-    #     img = r.json()
-    # else:
-    #     error_msg = r.json()
-    #     img = None
+    if r.status_code == 200:
+        error_msg = "CONFIG SUCCESS: CAPACITY=" + str(capacity_input) + " POLICY=" + str(policy_input)
+    else:
+        error_msg = r.json()
 
-    return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+    return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = capacity_input, init_policy = policy_input, error_msg = error_msg)
