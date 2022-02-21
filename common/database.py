@@ -9,7 +9,7 @@ engine = create_engine(DATABASE_URL, execution_options={"isolation_level": "READ
 if not database_exists(engine.url):
     create_database(engine.url)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
 Base = declarative_base()
 
