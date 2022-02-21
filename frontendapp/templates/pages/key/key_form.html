@@ -13,7 +13,10 @@
         <input type="submit">
         <input type="reset">
     </form>
-        {% if img != None %}
-            <img src="data:image/jpeg;base64,{{ img }}" alt="User Image"><br>
-        {% endif %}
+    {% if img != None %}
+        <img src="data:image/jpeg;base64,{{ img }}" alt="User Image"><br/>
+    {% endif %}
+    {% if img_file != None %}
+        <img src="{{ url_for('send_img', filename = img_file) }}" alt="User Image"><br/>
+    {% endif %}
 {% endblock %}
