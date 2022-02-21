@@ -207,8 +207,8 @@ def invalidateKey():
     else:
         # num_miss += 1
         response = webapp.response_class(
-            response=json.dumps("Unknown key"),
-            status=400,
+            response=json.dumps("OK"),
+            status=200,
             mimetype='application/json'
         )
 
