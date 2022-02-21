@@ -33,7 +33,7 @@ def print_cache_stats():
     eastern = timezone('US/Eastern')
     current_time = datetime.now(eastern)
     msg += "curent time: " + current_time.strftime("%X") + ".    "
-    print(msg)
+    # print(msg)
 
     local_session = webapp.db_session()
     new_entry = models.MemcacheStats(

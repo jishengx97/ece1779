@@ -8,3 +8,20 @@ def list_keys_form():
     local_session = webapp.db_session()
     result = local_session.query(models.KeyAndFileLocation)
     return render_template("pages/list_keys/list_keys_form.html", title = "LIST_KEYS", lists = result, error_msg = None)
+
+
+@webapp.route('/api/list_keys',methods=['POST'])
+def test_list_keys():
+    local_session = webapp.db_session()
+    result = local_session.query(models.KeyAndFileLocation)
+    key_list = []
+    for r in result:
+        key_list.append(r.key)
+    data = {"keys": key_list,
+            "success": "true"}
+    response = webapp.response_class(
+            response=json.dumps(data),
+            status=200,
+            mimetype='application/json'
+        )
+    return response

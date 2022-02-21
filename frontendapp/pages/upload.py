@@ -26,9 +26,9 @@ def upload_save():
     if new_file.filename == '':
         error_msg = "Missing file name"
         return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
-
+    local_session = webapp.db_session()
     file_filename, file_extension = os.path.splitext(new_file.filename)
-    result = webapp.db_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
+    result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
     if(result.count() == 1):
         # key exists, update file, send invalidate request
         os.remove(result.first().file_location)
@@ -46,19 +46,88 @@ def upload_save():
             key = key_input,
             file_location = "/home/ubuntu/ece1779/images"
         )
-        webapp.db_session.add(new_entry)
-        webapp.db_session.commit()
+        local_session.add(new_entry)
+        local_session.commit()
         # must refresh before accessing
-        webapp.db_session.refresh(new_entry)
+        local_session.refresh(new_entry)
         if not os.path.exists("/home/ubuntu/ece1779/images"):
             os.makedirs("/home/ubuntu/ece1779/images")
         new_file.filename = str(new_entry.id)+file_extension    
         new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
         new_entry.file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
-        webapp.db_session.commit()
+        local_session.commit()
         r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
         if r.status_code == 200:
             error_msg = "SUCCESS UPLOAD THE NEW IMAGE"
         else:
             error_msg = r.json()
     return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
+
+
+
+
+@webapp.route('/api/upload',methods=['POST'])
+def test_upload():
+    key_input = request.form['key']
+    if key_input == "":
+        data = {"success": "false", "error": {"code" : "servererrorcode", "message":"key is missing."}}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=400,
+                mimetype='application/json'
+            )
+        return response
+    if 'file' not in request.files:
+        data = {"success": "false","error": {"code" : "servererrorcode", "message":"file is missing."}}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=400,
+                mimetype='application/json'
+            )
+        return response
+    new_file = request.files['file']
+    if new_file.filename == '':
+        data = {"success": "false","error": {"code" : "servererrorcode", "message":"file is missing."}}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=400,
+                mimetype='application/json'
+            )
+        return response
+
+    local_session = webapp.db_session()
+    file_filename, file_extension = os.path.splitext(new_file.filename)
+    result = webapp.db_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
+    if(result.count() == 1):
+        # key exists, update file, send invalidate request
+        os.remove(result.first().file_location)
+        new_file.filename = str(result.first().id)+file_extension 
+        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
+        result.first().file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
+        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
+        
+    else:
+        # key doesn't exist, create new entry
+        new_entry = models.KeyAndFileLocation(
+            key = key_input,
+            file_location = "/home/ubuntu/ece1779/images"
+        )
+        local_session.add(new_entry)
+        local_session.commit()
+        # must refresh before accessing
+        local_session.refresh(new_entry)
+        if not os.path.exists("/home/ubuntu/ece1779/images"):
+            os.makedirs("/home/ubuntu/ece1779/images")
+        new_file.filename = str(new_entry.id)+file_extension    
+        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
+        new_entry.file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
+        local_session.commit()
+        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
+
+    data = {"success": "true"}
+    response = webapp.response_class(
+            response=json.dumps(data),
+            status=200,
+            mimetype='application/json'
+        )
+    return response
