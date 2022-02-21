@@ -53,3 +53,22 @@ class MemcacheStats(Base):
         Time,
         nullable=False
     )
+
+class KeyAndFileLocation(Base):
+    # key is unique, and file location is not.
+    __tablename__ = 'key_and_file_location'
+    id = Column(
+        Integer, 
+        primary_key=True,
+        autoincrement=True
+    )
+    key = Column(
+        String(120),
+        nullable=False,
+        unique=True,
+        Index=True
+    )
+    file_location = Column(
+        String(500),
+        nullable=False,
+    )
