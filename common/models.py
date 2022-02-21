@@ -66,7 +66,7 @@ class KeyAndFileLocation(Base):
         String(120),
         nullable=False,
         unique=True,
-        Index=True
+        index=True
     )
     file_location = Column(
         String(500),
