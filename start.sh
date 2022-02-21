@@ -26,7 +26,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 echo "> Starting the memcache app on port 5001"
-gunicorn --bind 0.0.0.0:5001 --workers=1 run_memcacheapp:webapp &> memcacheapp_log.txt &
+gunicorn --bind 0.0.0.0:5001 --timeout 0 --workers=1 run_memcacheapp:webapp &> memcacheapp_log.txt &
 
 echo "> Starting the frontend app on port 5000"
-gunicorn --bind 0.0.0.0:5000 --workers=1 run_frontendapp:webapp &> frontendapp_log.txt &
+gunicorn --bind 0.0.0.0:5000 --timeout 0 --workers=1 run_frontendapp:webapp &> frontendapp_log.txt &

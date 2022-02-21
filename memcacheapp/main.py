@@ -88,7 +88,7 @@ def put():
     global current_size
 
     key = request.form.get('key')
-    value = request.files['image'].getvalue()
+    value = request.files['image'].read()
     new_size = sys.getsizeof(value)
     num_request += 1
     # if image is larger than capacity
