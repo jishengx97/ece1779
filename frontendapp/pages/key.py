@@ -4,6 +4,7 @@ from frontendapp import webapp
 from flask import json
 from common import models
 import os
+import base64
 @webapp.route('/key',methods=['GET'])
 def key_form():
     return render_template("pages/key/key_form.html", title = "KEY", error_msg = None, img = None, img_file = None)
@@ -31,8 +32,13 @@ def key_save():
         if result.count() == 0:
             error_msg = "KEY DID NOT EXIST"
             return render_template("pages/key/key_form.html", title = "KEY", error_msg = error_msg, img = img, img_file = img_file)
-        img_file_path, img_file = os.path.split(result.first().file_location)
-        r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':open(result.first().file_location,'rb')})
+        # img_file_path, img_file = os.path.split(result.first().file_location)
+        img_binary1 = open(result.first().file_location,'rb')
+        img_binary2 = open(result.first().file_location,'rb')
+        img_file = base64.b64encode(img_binary2.read()).decode()
+        r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':img_binary1})
+        img_binary1.close()
+        img_binary2.close()
         if r.status_code != 200:
             error_msg = r.json()
     return render_template("pages/key/key_form.html", title = "KEY", error_msg = error_msg, img = img, img_file = img_file)
