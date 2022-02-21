@@ -1,16 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div class="error">
-        {{error_msg if error_msg != None}}
-    </div>
-
     <ul>
         <li><a href="{{url_for('main')}}">main</a></li>
     </ul>
 
-    {% for list in lists %}
-        {{ list.key }}<br/>
-    {% endfor %}     
-    
 {% endblock %}
