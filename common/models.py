@@ -41,12 +41,12 @@ class MemcacheStats(Base):
         Integer,
         nullable=False
     )
-    miss_rate = Column(
-        Float,
+    num_reads_served = Column(
+        Integer,
         nullable=False
     )
-    hit_rate = Column(
-        Float,
+    num_reads_missed = Column(
+        Integer,
         nullable=False
     )
     stats_timestamp = Column(

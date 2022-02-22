@@ -43,8 +43,8 @@ def print_cache_stats():
         num_items = num_item,
         total_size = current_size,
         num_requests_served = num_request,
-        miss_rate = miss_rate,
-        hit_rate = hit_rate,
+        num_reads_served = num_access,
+        num_reads_missed = num_miss,
         stats_timestamp = current_time
     )
     local_session.add(new_entry)
