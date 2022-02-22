@@ -63,7 +63,7 @@ class KeyAndFileLocation(Base):
         autoincrement=True
     )
     key = Column(
-        String(120),
+        String(120, collation='utf8_bin'),
         nullable=False,
         unique=True,
         index=True
