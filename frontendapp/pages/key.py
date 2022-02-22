@@ -25,10 +25,10 @@ def key_save():
     img = None
     img_file = None
     if r.status_code == 200:
-        error_msg = "Got the image from memcache directly!"
+        error_msg = "Got the image from memcache directly! KEY=" + key_input
         img = r.json()
     else:
-        error_msg = "Key put to memcache!"
+        error_msg = "Key put to memcache! KEY=" + key_input
         local_session = webapp.db_session()
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
         if result.count() == 0:
