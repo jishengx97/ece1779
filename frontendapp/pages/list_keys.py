@@ -6,8 +6,11 @@ list_title = "List all Known Keys"
 
 @webapp.route('/list_keys',methods=['GET'])
 def list_keys_form():
+    error_msg = None
     local_session = webapp.db_session()
     result = local_session.query(models.KeyAndFileLocation)
+    if(result.count() == 0):
+        return render_template("pages/list_keys/list_keys_form.html", title = list_title, lists = result, error_msg = "ERROR LIST IS EMPTY")
     return render_template("pages/list_keys/list_keys_form.html", title = list_title, lists = result, error_msg = None)
 
 
