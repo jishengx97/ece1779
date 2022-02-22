@@ -5,9 +5,11 @@ from flask import json
 from common import models
 import os
 import base64
+key_title = "Get Image From Memcache Using Key"
+
 @webapp.route('/key',methods=['GET'])
 def key_form():
-    return render_template("pages/key/key_form.html", title = "KEY", error_msg = None, img = None, img_file = None)
+    return render_template("pages/key/key_form.html", title = key_title, error_msg = None, img = None, img_file = None)
 
 @webapp.route('/key',methods=['POST'])
 def key_save():
@@ -16,22 +18,22 @@ def key_save():
     key_input = request.form.get("key_input")
     if key_input == "":
         error_msg = "Missing key"
-        return render_template("pages/key/key_form.html",title = "KEY",error_msg = error_msg, img = None, img_file = None)
+        return render_template("pages/key/key_form.html",title = key_title,error_msg = error_msg, img = None, img_file = None)
 
     r = requests.post("http://127.0.0.1:5001/get", data={'key':key_input})
 
     img = None
     img_file = None
     if r.status_code == 200:
-        error_msg = "FROM CACHE"
+        error_msg = "Got the image from memcache directly!"
         img = r.json()
     else:
-        error_msg = "FROM LOCAL"
+        error_msg = "Key put to memcache!"
         local_session = webapp.db_session()
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
         if result.count() == 0:
-            error_msg = "KEY DID NOT EXIST"
-            return render_template("pages/key/key_form.html", title = "KEY", error_msg = error_msg, img = img, img_file = img_file)
+            error_msg = "Key does not exist!"
+            return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
         # img_file_path, img_file = os.path.split(result.first().file_location)
         img_binary1 = open(result.first().file_location,'rb')
         img_binary2 = open(result.first().file_location,'rb')
@@ -41,7 +43,7 @@ def key_save():
         img_binary2.close()
         if r.status_code != 200:
             error_msg = r.json()
-    return render_template("pages/key/key_form.html", title = "KEY", error_msg = error_msg, img = img, img_file = img_file)
+    return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
 
 @webapp.route('/api/key/<key_value>',methods=['POST'])
 def test_key(key_value):
@@ -50,14 +52,14 @@ def test_key(key_value):
     img = None
     img_file = None
     if r.status_code == 200:
-        error_msg = "FROM CACHE"
+        error_msg = "Got the image from memcache directly!"
         img = r.json()
     else:
-        error_msg = "FROM LOCAL"
+        error_msg = "Key put to memcache!"
         local_session = webapp.db_session()
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_value)
         if result.count() == 0:
-            error_msg = "KEY DID NOT EXIST"
+            error_msg = "Key does not exist!"
             data = {"error": {"code" : "400", "message":"key does not exist."},
                     "success":"false"}
             response = webapp.response_class(

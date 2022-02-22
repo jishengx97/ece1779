@@ -9,12 +9,12 @@
 
 
     <ul>
-        <li><a href="{{url_for('main')}}">main</a></li>
+        <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
     </ul>
 
     <form action="{{url_for('config_save')}}" method="post">
         <input type="submit" name="action" value = "clear cache"><br/>
-        CAPACITY <input type="string" name="capacity_input" value = "{{ init_capacity }}"><br/>
+        CAPACITY <input type="string" name="capacity_input" value = "{{ init_capacity }}"> MB<br/>
         POLICY
         <select name="policy_input" selected="LRU">
             {% for policy in policys %}

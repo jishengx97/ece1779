@@ -3,6 +3,9 @@ from frontendapp import webapp
 from flask import json
 from common import models
 import requests
+config_title = "Change Memcache Configurations"
+choice1 = "Least Recently Used"
+choice2 = "Random"
 
 def is_float(element):
     try:
@@ -18,7 +21,7 @@ def config_form():
     obj = local_session.query(models.MemcacheConfig).first()
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
-    return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = None)
+    return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = None)
 
 @webapp.route('/config',methods=['POST'])
 def config_save():
@@ -32,22 +35,26 @@ def config_save():
     if (request.form['action'] == 'clear cache'):
         r = requests.post("http://127.0.0.1:5001/clear")
         if r.status_code == 200:
-            error_msg = "SUCCESS CACHE CLEAR"
+            error_msg = "Successfully cleared memcache!"
         else:
             error_msg = r.json() 
-        return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+        return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     capacity_input = request.form.get("capacity_input")
     policy_input = request.form.get('policy_input')
+    if(policy_input == choice1):
+        policy_input = "LRU"
+    else:
+        policy_input = "Random"
 
     if is_float(capacity_input) == False:
-        error_msg = "Please type in a valid float"
-        return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+        error_msg = "Please type in a valid float for capacity!"
+        return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
 
     capacity_input = float(capacity_input)
     
     if capacity_input == init_capacity and policy_input == init_policy:
-        error_msg = "Error nothing changed"
-        return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+        error_msg = "Nothing changed for configuration!"
+        return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     
     obj.capacity_in_mb = capacity_input
     obj.replacement_policy = policy_input
@@ -60,4 +67,4 @@ def config_save():
     else:
         error_msg = r.json()
 
-    return render_template("pages/config/config_form.html", title = "CONFIG", policys = ["LRU", "RANDOM"], init_capacity = capacity_input, init_policy = policy_input, error_msg = error_msg)
+    return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = capacity_input, init_policy = policy_input, error_msg = error_msg)

@@ -10,6 +10,7 @@ from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import base64
 import math
+stats_title = "Memcache Statistics"
 
 @webapp.route('/show_stats',methods=['GET', 'POST'])
 def show_stats():
@@ -18,7 +19,7 @@ def show_stats():
     num_stats_entries = local_session.query(models.MemcacheStats).count()
 
     if (num_stats_entries == 0):
-        return render_template("pages/show_stats/show_stats_form.html", title = "STATS", error_msg = "No stats available yet!")
+        return render_template("pages/show_stats/show_stats_form.html", title = stats_title, error_msg = "No stats available yet!")
     # Either get all entries from the database, or get entries for the last 10 minutes,
     # which is 60 / 5 * 10 = 120 entries
     num_entried_needed = min(num_stats_entries, 120)
@@ -100,7 +101,7 @@ def show_stats():
 
     img_all_in_one = get_html_decoded_figure_all_in_one(stats_timestamp, y_axes, titles, xlabels, ylabels)
 
-    # return render_template("pages/show_stats/show_stats_form.html", title = "STATS", error_msg = None, 
+    # return render_template("pages/show_stats/show_stats_form.html", title = stats_title, error_msg = None, 
     #     num_items_img=num_items_img, total_size_img=total_size_img, num_requests_served_img=num_requests_served_img,
     #     miss_rate_img=miss_rate_img, hit_rate_img=hit_rate_img)
     if num_reads_served == 0:
@@ -109,7 +110,7 @@ def show_stats():
     else:
         hit_rate = (num_reads_served - num_reads_missed) / num_reads_served * 100
         miss_rate = num_reads_missed / num_reads_served * 100
-    return render_template("pages/show_stats/show_stats_form.html", title = "STATS", start_time = stats_timestamp[0],
+    return render_template("pages/show_stats/show_stats_form.html", title = stats_title, start_time = stats_timestamp[0],
         end_time = stats_timestamp[-1], num_requests_served = str(num_requests_served), 
         hit_rate = str(hit_rate) + "%",
         miss_rate = str(miss_rate) + "%",
