@@ -24,9 +24,18 @@
     {% if hit_rate_img != None %}
         <img src="data:image/png;base64,{{ hit_rate_img }}" alt="Stats plot for Hitrate"><br>
     {% endif %} -->
-
-    {% if img != None %}
-        <img src="data:image/png;base64,{{ img }}" alt="Stats Img"><br>
-    {% endif %}
+    <div>
+        {% if error_msg %}
+            {{error_msg}}
+        {% else %}
+            Displaying Statistics for the Memcache from {{ start_time }} to {{ end_time }} <br>
+            Total number of requests served: {{ num_requests_served }} <br>
+            Hit rate: {{ hit_rate }} <br>
+            Miss rate: {{ miss_rate }} <br>
+            {% if img != None %}
+                <img src="data:image/png;base64,{{ img }}" alt="Stats Img"><br>
+            {% endif %}
+        {% endif %}
+    </div>
 
 {% endblock %}

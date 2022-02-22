@@ -32,16 +32,16 @@ def show_stats():
     # prepare data to generate figures
     num_items = []
     total_size = []
-    num_requests_served = []
-    miss_rate = []
-    hit_rate = []
+    num_requests_served = 0
+    num_reads_served = 0
+    num_reads_missed = 0
     stats_timestamp = []
     for item in results:
         num_items.append(item.num_items)
-        total_size.append(item.total_size)
-        num_requests_served.append(item.num_requests_served)
-        miss_rate.append(item.miss_rate)
-        hit_rate.append(item.hit_rate)
+        total_size.append(item.total_size * 1024)
+        num_requests_served += item.num_requests_served
+        num_reads_served += item.num_reads_served
+        num_reads_missed += item.num_reads_missed
         stats_timestamp.append(item.stats_timestamp.strftime("%X"))
     
     print("after_stats_query")
@@ -93,17 +93,26 @@ def show_stats():
     #     'Percentages' # ylabel
     # )
 
-    y_axes = [num_items, total_size, num_requests_served, miss_rate, hit_rate]
-    titles = ['Number of Items in Memcache','Total Size of Items in Memcache','Number of Requests Served by Memcache','Missrate','Hitrate']
-    xlabels = ['Time (Eastern)', 'Time (Eastern)', 'Time (Eastern)', 'Time (Eastern)', 'Time (Eastern)']
-    ylabels = ['Items',  'Byte(s)', 'Requests', 'Percentages', 'Percentages']
+    y_axes = [num_items, total_size]
+    titles = ['Number of Items in Memcache','Total Size of Items in Memcache']
+    xlabels = ['Time (Eastern)', 'Time (Eastern)']
+    ylabels = ['Items',  'KiloByte(s)']
 
     img_all_in_one = get_html_decoded_figure_all_in_one(stats_timestamp, y_axes, titles, xlabels, ylabels)
 
     # return render_template("pages/show_stats/show_stats_form.html", title = "STATS", error_msg = None, 
     #     num_items_img=num_items_img, total_size_img=total_size_img, num_requests_served_img=num_requests_served_img,
     #     miss_rate_img=miss_rate_img, hit_rate_img=hit_rate_img)
-    return render_template("pages/show_stats/show_stats_form.html", title = "STATS", error_msg = None, 
+    if num_reads_served == 0:
+        hit_rate = 0
+        miss_rate = 0
+    else:
+        hit_rate = (num_reads_served - num_reads_missed) / num_reads_served * 100
+        miss_rate = num_reads_missed / num_reads_served * 100
+    return render_template("pages/show_stats/show_stats_form.html", title = "STATS", start_time = stats_timestamp[0],
+        end_time = stats_timestamp[-1], num_requests_served = str(num_requests_served), 
+        hit_rate = str(hit_rate) + "%",
+        miss_rate = str(miss_rate) + "%",
         img=img_all_in_one)
 
 def get_html_decoded_figure(x_axis, y_axis, title, xlabel, ylabel):
