@@ -7,7 +7,7 @@
 # in to the repository.
 
 # Uncomment this line when copied to the home directory
-# cd ~/ece1779/
+cd ~/ece1779/
 
 # Default to not pulling from git because it's getting annoying :)
 if [ "$1" = "pull_latest" ]; then
@@ -30,10 +30,10 @@ echo "> Starting the memcache app on port 5001"
 gunicorn --bind 0.0.0.0:5001 --timeout 0 --workers=1 --threads=2 --capture-output --log-level debug run_memcacheapp:webapp &> memcacheapp_log.txt &
 
 # Wait a bit to allow setup to properly finish
-sleep 1
+sleep 2
 
 echo "> Starting the frontend app on port 5000"
 gunicorn --bind 0.0.0.0:5000 --timeout 0 --workers=1 --threads=2 --capture-output --log-level debug run_frontendapp:webapp &> frontendapp_log.txt &
 
 # Wait a bit to allow setup to properly finish
-sleep 1
+sleep 2
