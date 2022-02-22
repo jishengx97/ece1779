@@ -4,7 +4,7 @@ from frontendapp import webapp
 from flask import json
 import os
 from common import models
-
+import re
 @webapp.route('/upload',methods=['GET'])
 def upload_form():
     return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = None)
@@ -16,18 +16,27 @@ def upload_save():
     if key_input == "":
         error_msg = "Missing key"
         return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
-    
+    if len(key_input) > 120:
+        error_msg = "Key size should be less than 120"
+        return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
+    if  re.match("^[A-Za-z0-9_-]*$", key_input) == None:
+        error_msg = "Please do not use special character"
+        return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
     if 'uploadedfile' not in request.files:
         error_msg = "Missing uploaded file"
         return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
-    
+
     new_file = request.files['uploadedfile']
 
     if new_file.filename == '':
         error_msg = "Missing file name"
         return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
-    local_session = webapp.db_session()
+    ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif'}
     file_filename, file_extension = os.path.splitext(new_file.filename)
+    if (file_extension.lower() in ALLOWED_EXTENSIONS) == False:
+        error_msg = "Only allow jpg jpeg png gif"
+        return render_template("pages/upload/upload_form.html", title = "UPLOAD", error_msg = error_msg)
+    local_session = webapp.db_session()
     result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
     if(result.count() == 1):
         # key exists, update file, send invalidate request
