@@ -22,7 +22,7 @@ def upload_save():
         error_msg = "Key should be less than 120 characters long!"
         return render_template("pages/upload/upload_form.html", title = upload_title, error_msg = error_msg)
     if  re.match("^[A-Za-z0-9_-]*$", key_input) == None:
-        error_msg = "Please only use upper and lower-case letters, numbers, dashs and underscores in key!"
+        error_msg = "Please only use upper and lower-case letters, numbers, dashes and underscores in key!"
         return render_template("pages/upload/upload_form.html", title = upload_title, error_msg = error_msg)
     if 'uploadedfile' not in request.files:
         error_msg = "Please upload an image file!"

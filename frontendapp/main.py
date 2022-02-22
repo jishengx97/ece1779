@@ -7,7 +7,7 @@ from common import models
 
 @webapp.route('/',methods=['GET'], strict_slashes=False)
 def main():
-    return render_template("main.html",title = "MAIN")
+    return render_template("main.html",title = "Welcome to Key Value In-Memory Cache")
 
 @webapp.after_request
 def disable_cache(response):
