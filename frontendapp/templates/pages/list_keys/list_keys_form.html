@@ -10,10 +10,19 @@
 
     <ul>
         <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
-    </ul>
-
-    {% for list in lists %}
-        {{ list.key }}<br/>
-    {% endfor %}     
-    
+    </ul>   
+    <table>
+        <thead>
+          <tr>
+            <th>KEYS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for list in lists %}
+            <tr>
+              <td>{{ list.key }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 {% endblock %}
