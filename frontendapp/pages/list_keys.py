@@ -10,7 +10,7 @@ def list_keys_form():
     local_session = webapp.db_session()
     result = local_session.query(models.KeyAndFileLocation)
     if(result.count() == 0):
-        return render_template("pages/list_keys/list_keys_form.html", title = list_title, lists = result, error_msg = "ERROR LIST IS EMPTY")
+        return render_template("pages/list_keys/list_keys_form.html", title = list_title, lists = result, error_msg = "No keys are known yet!")
     return render_template("pages/list_keys/list_keys_form.html", title = list_title, lists = result, error_msg = None)
 
 
