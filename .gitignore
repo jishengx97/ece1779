@@ -4,3 +4,4 @@ venv
 frontendapp_log.txt
 memcacheapp_log.txt
 images/*
+.env
