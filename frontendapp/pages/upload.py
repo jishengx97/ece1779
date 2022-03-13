@@ -1,10 +1,12 @@
 import requests
 from flask import render_template, url_for, request
-from frontendapp import webapp
+from frontendapp import webapp, s3_bucket_name
 from flask import json
 import os
 from common import models
 import re
+import boto3
+from decouple import config
 upload_title = "Upload Key and Image Pair"
 
 @webapp.route('/upload',methods=['GET'])
@@ -39,13 +41,16 @@ def upload_save():
         error_msg = "Only .jpg, .jpeg, .png and .gif formats are allowed!"
         return render_template("pages/upload/upload_form.html", title = upload_title, error_msg = error_msg)
     local_session = webapp.db_session()
+    client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
     result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
     if(result.count() == 1):
         # key exists, update file, send invalidate request
-        os.remove(result.first().file_location)
+        client.delete_object(Bucket=s3_bucket_name, Key=result.first().file_location)
+        # os.remove(result.first().file_location)
         new_file.filename = str(result.first().id)+file_extension 
-        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
-        result.first().file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
+        client.put_object(Body=new_file, Bucket=s3_bucket_name, Key='test/'+new_file.filename)
+        # new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
+        result.first().file_location = "test/"+new_file.filename
         r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
         if r.status_code == 200:
             error_msg = "Key already exists, updated image."
@@ -53,20 +58,23 @@ def upload_save():
             error_msg = r.json()   
     else:
         # key doesn't exist, create new entry
+
         new_entry = models.KeyAndFileLocation(
             key = key_input,
-            file_location = "/home/ubuntu/ece1779/images"
+            file_location = "wangha78"
         )
         local_session.add(new_entry)
         local_session.commit()
         # must refresh before accessing
         local_session.refresh(new_entry)
-        if not os.path.exists("/home/ubuntu/ece1779/images"):
-            os.makedirs("/home/ubuntu/ece1779/images")
+        # if not os.path.exists("/home/ubuntu/ece1779/images"):
+        #     os.makedirs("/home/ubuntu/ece1779/images")
         new_file.filename = str(new_entry.id)+file_extension    
-        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
-        new_entry.file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
+        client.put_object(Body=new_file, Bucket=s3_bucket_name, Key='test/'+new_file.filename)
+        # new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
+        new_entry.file_location = "test/"+new_file.filename
         local_session.commit()
+
         r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
         if r.status_code == 200:
             error_msg = "Successfully uploaded the key and image pair!"

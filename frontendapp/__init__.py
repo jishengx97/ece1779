@@ -8,6 +8,7 @@ webapp.url_map.strict_slashes = False
 database.init_db()
 
 webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
+s3_bucket_name = 'ece17791'
 
 # initialzes the database and populates them with default values if necessary
 from frontendapp import initialize_db

@@ -32,7 +32,8 @@ from memcacheapp import main
 
 scheduler = BackgroundScheduler(timezone='US/Eastern')
 scheduler.add_job(func=main.print_cache_stats, trigger="interval", seconds=5)
-scheduler.start()
+# scheduler.start()
 bg_scheduler_started = True
+
 
 atexit.register(lambda: scheduler.shutdown())

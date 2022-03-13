@@ -3,7 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-DATABASE_URL = "mysql+pymysql://root:ece1779pass@127.0.0.1/ece1779project"
+DATABASE_URL = "mysql+pymysql://root:ece1779pass@ece1779project.ctx9tvih2qlf.us-east-1.rds.amazonaws.com:3306/ece1779project"
+ 
 
 engine = create_engine(DATABASE_URL, echo=True)
 if not database_exists(engine.url):

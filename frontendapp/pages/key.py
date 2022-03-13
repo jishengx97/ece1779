@@ -1,10 +1,12 @@
 import requests
 from flask import render_template, url_for, request, send_from_directory
-from frontendapp import webapp
+from frontendapp import webapp, s3_bucket_name
 from flask import json
 from common import models
 import os
 import base64
+import boto3
+from decouple import config
 key_title = "Get Image From Memcache Using Key"
 
 @webapp.route('/key',methods=['GET'])
@@ -30,17 +32,24 @@ def key_save():
     else:
         error_msg = "Key put to memcache! KEY=" + key_input
         local_session = webapp.db_session()
+        client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
         if result.count() == 0:
             error_msg = "Key does not exist!"
             return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
         # img_file_path, img_file = os.path.split(result.first().file_location)
-        img_binary1 = open(result.first().file_location,'rb')
-        img_binary2 = open(result.first().file_location,'rb')
+
+        obj = client.get_object(Bucket=s3_bucket_name, Key=result.first().file_location)
+        img_binary1 = obj['Body']
+        img_binary2 = obj['Body']
+        
+        # img_binary1 = open(result.first().file_location,'rb')
+        # img_binary2 = open(result.first().file_location,'rb')
         img_file = base64.b64encode(img_binary2.read()).decode()
         r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':img_binary1})
         img_binary1.close()
         img_binary2.close()
+
         if r.status_code != 200:
             error_msg = r.json()
     return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
