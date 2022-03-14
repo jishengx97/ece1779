@@ -2,8 +2,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
+from decouple import config
 
-DATABASE_URL = "mysql+pymysql://root:ece1779pass@ece1779project.ctx9tvih2qlf.us-east-1.rds.amazonaws.com:3306/ece1779project"
+database_username = config('RDS_DATABASE_USERNAME')
+database_password = config('RDS_DATABASE_PASSWORD')
+database_endpoint = config('RDS_DATABASE_ENDPOINT')
+database_port = config('RDS_DATABASE_PORT')
+database_name = config('RDS_DATABASE_NAME')
+DATABASE_URL = "mysql+pymysql://" + database_username + ":" + database_password + "@" + database_endpoint + ":" + database_port + "/" + database_name
  
 
 engine = create_engine(DATABASE_URL, echo=True)
