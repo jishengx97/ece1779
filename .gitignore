@@ -3,5 +3,6 @@ venv
 *__pycache__*
 frontendapp_log.txt
 memcacheapp_log.txt
+managerapp_log.txt
 images/*
 .env
