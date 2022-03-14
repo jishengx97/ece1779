@@ -9,19 +9,23 @@ import sys
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from pytz import timezone
+import boto3
+from botocore.exceptions import ClientError
+from decouple import config
+from ec2_metadata import ec2_metadata
 
 def print_cache_stats():
     global num_request
     global num_access
     global num_miss
-    msg = ''
-    msg += "Capacity: " + str(capacity) + " MB" + ".    "
-    msg += "current_size: " + str(current_size) + " bytes"+ ".  "
-    msg += "policy: " + policy + ".     "
-    msg += "num_item: " + str(num_item) + ".    "
-    msg += "num_request: " + str(num_request) + ".      "
-    msg += "num_miss: " + str(num_miss) + ".    "
-    msg += "num_access: " + str(num_access) + ".    "
+    # msg = ''
+    # msg += "Capacity: " + str(capacity) + " MB" + ".    "
+    # msg += "current_size: " + str(current_size) + " bytes"+ ".  "
+    # msg += "policy: " + policy + ".     "
+    # msg += "num_item: " + str(num_item) + ".    "
+    # msg += "num_request: " + str(num_request) + ".      "
+    # msg += "num_miss: " + str(num_miss) + ".    "
+    # msg += "num_access: " + str(num_access) + ".    "
 
     # Miss rate and hit rate in percentage
     if num_access > 0:
@@ -30,25 +34,92 @@ def print_cache_stats():
     else:
         miss_rate = 0.0
         hit_rate = 0.0
-    msg += "miss rate: " + str(miss_rate) + "%.    "
-    msg += "hit rate: " + str(hit_rate) + "%.    "
+    # msg += "miss rate: " + str(miss_rate) + "%.    "
+    # msg += "hit rate: " + str(hit_rate) + "%.    "
 
     eastern = timezone('US/Eastern')
     current_time = datetime.now(eastern)
-    msg += "curent time: " + current_time.strftime("%X") + ".    "
+    # msg += "curent time: " + current_time.strftime("%X") + ".    "
     # print(msg)
 
-    local_session = webapp.db_session()
-    new_entry = models.MemcacheStats(
-        num_items = num_item,
-        total_size = current_size,
-        num_requests_served = num_request,
-        num_reads_served = num_access,
-        num_reads_missed = num_miss,
-        stats_timestamp = current_time
+    # print("Writing to CloudWatch Custom Metrics")
+    cw_client = boto3.client('cloudwatch', 
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey')
     )
-    local_session.add(new_entry)
-    local_session.commit()
+    metric_namespace = 'ece1779-a2-memcache-stats'
+    dimentions = [
+        {
+            'Name': 'InstanceID',
+            'Value': ec2_metadata.instance_id
+        },
+    ]
+
+    # publish the actual datapoint
+    metric_name = 'num_miss'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': num_miss,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+            }
+        ]
+    )
+
+    metric_name = 'num_access'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': num_access,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+            }
+        ]
+    )
+
+    metric_name = 'num_request'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': num_request,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+            }
+        ]
+    )
+
+    metric_name = 'num_item'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': num_item,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+            }
+        ]
+    )
+
+    metric_name = 'current_size'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': current_size,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+            }
+        ]
+    )
 
     lock.acquire()
     try:
