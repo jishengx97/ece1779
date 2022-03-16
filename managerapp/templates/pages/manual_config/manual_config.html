@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if error_msg != None %}
+        <div class="error">
+            {{ error_msg }}
+        </div>
+    {% endif %}
+
+
+    <ul>
+        <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
+    </ul>
+
+    <ul>
+        Currently, active instance: {{current_size}}<br>
+        The max number of instance is 8. <br>
+        The min number of instance is 1.
+    </ul>
+
+    
+    <form action="{{url_for('manual_config_post')}}"  enctype="multipart/form-data" method="post">
+
+        <div class="panel-body">
+            <input type ="submit" name="action" value="expand">
+        </div>
+        <div class="panel-body">
+            <input type ="submit" name="action" value="shrink">
+        </div>
+        
+    </form>
+{% endblock %}

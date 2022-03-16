@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if error_msg != None %}
+        <div class="error">
+            {{ error_msg }}
+        </div>
+    {% endif %}
+
+
+    <ul>
+        <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
+    </ul>
+    <ul>
+        Current active instance: {{current_size}}
+    </ul>
+{% endblock %}

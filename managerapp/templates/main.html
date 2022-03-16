@@ -2,7 +2,8 @@
 {% block content %}
 
     <ul>
-        
+        <li><a href="{{url_for('pool_stats')}}">View Stats of Current Cache Pool</a></li>
+        <li><a href="{{url_for('manual_config')}}">Manually Config Cache Pool</a></li>
     </ul>
 
 {% endblock %}
