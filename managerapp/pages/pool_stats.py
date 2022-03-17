@@ -13,7 +13,5 @@ from decouple import config
 @webapp.route('/pool_stats',methods=['GET'])
 def pool_stats  ():
     print(instance_pool)
-    # global current_pool_size
-    # current_pool_size = current_pool_size + 1
     return render_template("pages/pool_stats/pool_stats.html", title = 'Diplay Current Pool Stats',  current_size = current_pool_size[0], error_msg = None)
 

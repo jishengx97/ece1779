@@ -6,3 +6,4 @@ memcacheapp_log.txt
 managerapp_log.txt
 images/*
 .env
+*.pem

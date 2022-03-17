@@ -1,4 +1,4 @@
-from managerapp import webapp, current_pool_size,pending_instance,instance_pool
+from managerapp import webapp, current_pool_size,instance_pool
 from managerapp.pages import pool_stats
 import requests
 from flask import render_template, url_for, request
@@ -10,6 +10,7 @@ import boto3
 from decouple import config
 from multiprocessing.dummy import Process
 import time
+import paramiko
 
 @webapp.route('/manual_config',methods=['GET'])
 def manual_config():
@@ -20,7 +21,6 @@ def manual_config():
 
 @webapp.route('/manual_config',methods=['POST'])
 def manual_config_post():
-    global pending_instance
     # global current_pool_size
 
     error_msg = None
@@ -48,28 +48,25 @@ def manual_config_post():
             ],
             ImageId='ami-080ff70d8f5b80ba5',
             InstanceType='t2.micro',
-            KeyName='samuel_ece1779',
+            KeyName=config('KEY_NAME'),
             MaxCount=1,
             MinCount=1,
             Monitoring={
                 'Enabled': False
             },
             SecurityGroupIds=[
-                'sg-0e1432edaa6860df2',
-            ],
-            SubnetId='subnet-07a75a35b48bd500c',
+                config('SECURITY_GROUP'),
+            ]
         )
         
         print(response['Instances'][0]['InstanceId'])
         print(response['Instances'][0]['State']['Name'])
         
-        pending_instance = pending_instance + 1
         new_instance ={}
         new_instance['InstanceId'] = response['Instances'][0]['InstanceId']
         instance_pool.append(new_instance)
 
         error_msg = 'Launching new memcache instance.'
-        # time.sleep(2)
         p = Process(target=check_launch_and_notify, args= (response['Instances'][0]['InstanceId'], ))
         p.start()
 
@@ -95,7 +92,7 @@ def manual_config_post():
 
 def check_launch_and_notify(instance_id):
     print("subprocess starts")
-    global pending_instance
+    # global pending_instance
     time.sleep(3) ### call describe_instances() right after run_instances() will get error, so we need to sleep a while, so AWS can initilize the new instance 
     client = boto3.client('ec2', region_name='us-east-1')
     response = client.describe_instances(
@@ -121,14 +118,35 @@ def check_launch_and_notify(instance_id):
     print(response['Reservations'][0]['Instances'][0]['PublicDnsName'])
     print(response['Reservations'][0]['Instances'][0]['PublicIpAddress'])
 
-    # new_instance ={}
-    # new_instance['InstanceId'] = response['Reservations'][0]['Instances'][0]['InstanceId']
-    # new_instance['State'] = response['Reservations'][0]['Instances'][0]['State']['Name']
-    # new_instance['DNS'] = response['Reservations'][0]['Instances'][0]['PublicDnsName']
-    # new_instance['IP'] = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
-    # pending_instance  = pending_instance - 1
-    # instance_pool.append(new_instance)
-    # print(instance_pool)
+    new_cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    connected = False
+    while connected == False:
+        try:
+            # connect
+            client.connect(new_cache_ip, username='ubuntu', key_filename=config('PEM_PATH'))
+            connected = True
+        except:
+            print("connection fails. Sleeping")
+            time.sleep(2)
+    
+    
+    stdin, stdout, stderr = client.exec_command('git clone https://github.com/jishengx97/ece1779.git')
+    print(stdout.readlines())
+    print(stderr.readlines())
+
+    ftp = client.open_sftp()
+    ftp.put('/home/ubuntu/ece1779/.env', '/home/ubuntu/ece1779/.env')
+
+    stdin, stdout, stderr = client.exec_command('cd ece1779; ./start_memcache.sh')
+    print(stderr.readlines())
+    print(stdout.readlines())
+
+    client.close()
+
+
 
     ######## notify frontend this new instance ########
     

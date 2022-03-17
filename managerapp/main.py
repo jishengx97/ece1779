@@ -1,13 +1,17 @@
 
 from flask import render_template, url_for, request
-from managerapp import webapp,instance_pool,current_pool_size
+from managerapp import webapp,instance_pool,current_pool_size,frontend_info,memcache_info
 from flask import json
 import boto3   
 import time
+import paramiko
 
 @webapp.route('/',methods=['GET'], strict_slashes=False)
 def main():
-    print(instance_pool)
+    # print(instance_pool)
+    # print(frontend_info)
+    # print(memcache_info)
+
     return render_template("main.html",title = "Welcome to cache manager")
 
 
