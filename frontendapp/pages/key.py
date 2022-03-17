@@ -4,6 +4,7 @@ from frontendapp import webapp, s3_bucket_name
 from flask import json
 from common import models
 import os
+import io
 import base64
 import boto3
 from decouple import config
@@ -40,15 +41,15 @@ def key_save():
         # img_file_path, img_file = os.path.split(result.first().file_location)
 
         obj = client.get_object(Bucket=s3_bucket_name, Key=result.first().file_location)
-        img_binary1 = obj['Body']
-        img_binary2 = obj['Body']
-        
+        file_like_obj = io.BytesIO(obj['Body'].read())
+
         # img_binary1 = open(result.first().file_location,'rb')
         # img_binary2 = open(result.first().file_location,'rb')
-        img_file = base64.b64encode(img_binary2.read()).decode()
-        r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':img_binary1})
-        img_binary1.close()
-        img_binary2.close()
+        img_file = base64.b64encode(file_like_obj.read()).decode()
+        file_like_obj.seek(0)
+        r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':file_like_obj})
+        # img_binary1.close()
+        # img_binary2.close()
 
         if r.status_code != 200:
             error_msg = r.json()

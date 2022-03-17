@@ -65,6 +65,7 @@ def print_cache_stats():
                 'Value': num_miss,
                 'Timestamp': current_time,
                 'Dimensions': dimentions,
+                'StorageResolution': 1,
             }
         ]
     )
@@ -78,6 +79,7 @@ def print_cache_stats():
                 'Value': num_access,
                 'Timestamp': current_time,
                 'Dimensions': dimentions,
+                'StorageResolution': 1,
             }
         ]
     )
@@ -91,6 +93,7 @@ def print_cache_stats():
                 'Value': num_request,
                 'Timestamp': current_time,
                 'Dimensions': dimentions,
+                'StorageResolution': 1,
             }
         ]
     )
@@ -104,6 +107,7 @@ def print_cache_stats():
                 'Value': num_item,
                 'Timestamp': current_time,
                 'Dimensions': dimentions,
+                'StorageResolution': 1,
             }
         ]
     )
@@ -117,6 +121,7 @@ def print_cache_stats():
                 'Value': current_size,
                 'Timestamp': current_time,
                 'Dimensions': dimentions,
+                'StorageResolution': 1,
             }
         ]
     )
