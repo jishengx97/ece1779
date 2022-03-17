@@ -25,7 +25,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # # # It is important to launch memcache app first because it is setting up the database
-echo "> Starting the managercache app on port 5000"
+echo "> Starting the manager app on port 5000"
 gunicorn --bind 0.0.0.0:5000 --timeout 0 --workers=1 --threads=2 --capture-output --log-level debug run_managerapp:webapp &> managerapp_log.txt &
 
 # Wait a bit to allow setup to properly finish
