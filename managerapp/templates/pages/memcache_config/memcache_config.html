@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+    {% if error_msg != None %}
+        <div class="error">
+            {{ error_msg }}
+        </div>
+    {% endif %}
+
+
+    <ul>
+        <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
+    </ul>
+
+    <form action="{{url_for('memcache_config_save')}}" method="post">
+        CAPACITY <br/><input type="string" name="capacity_input" value = "{{ init_capacity }}">MB<br/><br/>
+        POLICY<br/>
+        <select name="policy_input" selected="LRU">
+            {% for policy in policys %}
+                {% if policy == init_policy %}
+                    <option value="{{ policy }}" SELECTED>{{ policy }}</option>
+                {% else %}
+                    <option value="{{ policy }}" >{{ policy }}</option>
+                {% endif %}
+            {% endfor %}     
+        </select>
+        <br/><br/>
+        <input type="submit" name="action">
+        <input type="reset">
+    </form>
+{% endblock %}

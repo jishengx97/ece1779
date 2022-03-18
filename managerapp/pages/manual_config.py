@@ -140,7 +140,7 @@ def check_launch_and_notify(instance_id):
     ftp = client.open_sftp()
     ftp.put('/home/ubuntu/ece1779/.env', '/home/ubuntu/ece1779/.env')
 
-    stdin, stdout, stderr = client.exec_command('cd ece1779; ./start_memcache.sh')
+    stdin, stdout, stderr = client.exec_command('cd ece1779; chmod 700 start_memcache.sh; ./start_memcache.sh')
     print(stderr.readlines())
     print(stdout.readlines())
 
