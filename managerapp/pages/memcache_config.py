@@ -33,13 +33,28 @@ def memcache_config_save():
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
 
-    # if (request.form['action'] == 'clear cache'):
-    #     r = requests.post("http://127.0.0.1:5001/clear")
-    #     if r.status_code == 200:
-    #         error_msg = "Successfully cleared memcache!"
-    #     else:
-    #         error_msg = r.json() 
-    #     return render_template("pages/config/config_form.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+    if (request.form['action'] == 'clear cache'):
+        # send clear to all memcache in the pool
+        client = boto3.client('ec2', region_name='us-east-1')
+        error_msg = ''
+        for instance in instance_pool:
+            response = client.describe_instances(
+                InstanceIds=[
+                    instance['InstanceId'],
+                ]
+            )
+
+            cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+            print('cache IP is '+cache_ip)
+
+            r = requests.post("http://" + cache_ip + ":5001/clear")
+            if r.status_code == 200:
+                error_msg += 'CLEAR  CACHE FOR INSTANCE ' + instance['InstanceId']
+            else:
+                error_msg += r.json()
+        return render_template("pages/memcache_config/memcache_config.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+    
+    
     capacity_input = request.form.get("capacity_input")
     policy_input = request.form.get('policy_input')
     if(policy_input == choice1):
