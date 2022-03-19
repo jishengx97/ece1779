@@ -1,8 +1,7 @@
 from flask import render_template, url_for, request
-from frontendapp import webapp
+from frontendapp import webapp, ip_list
 from flask import json
 from common import models
-ip_list = set()
 
 @webapp.route('/memcaches/launched',methods=['POST'])
 def memcaches_launched():
