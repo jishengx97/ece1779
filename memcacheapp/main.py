@@ -126,6 +126,20 @@ def print_cache_stats():
         ]
     )
 
+    metric_name = 'num_workers'
+    response = cw_client.put_metric_data(
+        Namespace=metric_namespace,
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': 1,
+                'Timestamp': current_time,
+                'Dimensions': dimentions,
+                'StorageResolution': 1,
+            }
+        ]
+    )
+
     lock.acquire()
     try:
         num_miss = 0
