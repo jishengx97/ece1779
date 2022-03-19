@@ -2,6 +2,7 @@ from flask import render_template, url_for, request
 from frontendapp import webapp, ip_list
 from flask import json
 from common import models
+import hashlib
 
 @webapp.route('/memcaches/launched',methods=['POST'])
 def memcaches_launched():
@@ -34,4 +35,19 @@ def memcaches_terminated():
         status=400,
         mimetype='application/json'
     )
-    return response            
+    return response
+
+@webapp.route('/memcaches/hash',methods=['POST'])
+def key_hash_int():
+    key_input = request.form.get("key_input")
+    hashvalue = hashlib.md5(key_input.encode())
+    hexvalue = hashvalue.hexdigest()
+    result = int(hexvalue,16)
+    num_cycle = result%16
+    data = {"success": "true","hashvalue": num_cycle}
+    response = webapp.response_class(
+            response=json.dumps(data),
+            status=200,
+            mimetype='application/json'
+        )
+    return response
