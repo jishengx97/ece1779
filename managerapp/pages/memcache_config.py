@@ -47,7 +47,7 @@ def memcache_config_save():
             cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
             print('cache IP is '+cache_ip)
 
-            r = requests.post("http://" + cache_ip + ":5001/clear")
+            r = requests.post("http://" + cache_ip + ":5000/clear")
             if r.status_code == 200:
                 error_msg += 'CLEAR  CACHE FOR INSTANCE ' + instance['InstanceId']
             else:
@@ -89,7 +89,7 @@ def memcache_config_save():
         cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
         print('cache IP is '+cache_ip)
 
-        r = requests.post("http://" + cache_ip + ":5001/refreshConfiguration")
+        r = requests.post("http://" + cache_ip + ":5000/refreshConfiguration")
         if r.status_code == 200:
             error_msg += 'CONFIG SUCCESS FOR INSTANCE ' + instance['InstanceId']
         else:
