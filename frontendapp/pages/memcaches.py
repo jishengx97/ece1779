@@ -3,11 +3,14 @@ from frontendapp import webapp, ip_list
 from flask import json
 from common import models
 import hashlib
+import json
 
 @webapp.route('/memcaches/launched',methods=['POST'])
 def memcaches_launched():
-    ip_input = request.form.get("ip_input")
-    ip_list.add(ip_input)
+    list_string = request.form.get("list_string")
+    temp_list = json.loads(list_string)
+    global ip_list
+    ip_list = ip_list + temp_list
     data = {"success": "true"}
     response = webapp.response_class(
             response=json.dumps(data),
@@ -18,9 +21,10 @@ def memcaches_launched():
 
 @webapp.route('/memcaches/terminated',methods=['POST'])
 def memcaches_terminated():
-    ip_input = request.form.get("ip_input")
-    if ip_input in ip_list:
-        ip_list.remove(ip_input)
+    terminate_num = int(request.form.get("terminate_num"))
+    global ip_list
+    if terminate_num <= len(ip_list):
+        ip_list = ip_list[:-terminate_num]
         data = {"success": "true"}
         response = webapp.response_class(
                 response=json.dumps(data),
@@ -28,7 +32,7 @@ def memcaches_terminated():
                 mimetype='application/json'
             )
         return response
-    data = {"error": {"code" : "400", "message":"IP address is not known yet."},
+    data = {"error": {"code" : "400", "message":"terminate_num > len(ip_list)"},
             "success":"false"}
     response = webapp.response_class(
         response=json.dumps(data),
