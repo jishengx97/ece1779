@@ -56,88 +56,71 @@ def print_cache_stats():
     ]
 
     # publish the actual datapoint
+    metric_data = []
     metric_name = 'num_miss'
-    response = cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': num_miss,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
-    )
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': num_miss,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
 
     metric_name = 'num_access'
-    response = cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': num_access,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
-    )
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': num_access,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
+
 
     metric_name = 'num_request'
-    response = cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': num_request,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
-    )
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': num_request,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
 
     metric_name = 'num_item'
-    response = cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': num_item,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
-    )
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': num_item,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
 
     metric_name = 'current_size'
-    response = cw_client.put_metric_data(
-        Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': current_size,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
-    )
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': current_size,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
 
     metric_name = 'num_workers'
+    metric_data.append(
+        {
+            'MetricName': metric_name,
+            'Value': 1,
+            'Timestamp': current_time,
+            'Dimensions': dimentions,
+            'StorageResolution': 1,
+        })
+
     response = cw_client.put_metric_data(
         Namespace=metric_namespace,
-        MetricData=[
-            {
-                'MetricName': metric_name,
-                'Value': 1,
-                'Timestamp': current_time,
-                'Dimensions': dimentions,
-                'StorageResolution': 1,
-            }
-        ]
+        MetricData=metric_data,
     )
 
     lock.acquire()
