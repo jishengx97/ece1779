@@ -44,7 +44,6 @@ def memcaches_terminated():
 @webapp.route('/memcaches/hash',methods=['POST'])
 def key_hash_int():
     key_input = request.form.get("key_input")
-    print(key_input)
     hashvalue = hashlib.md5(key_input.encode())
     hexvalue = hashvalue.hexdigest()
     result = int(hexvalue,16)
