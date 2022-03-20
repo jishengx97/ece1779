@@ -1,16 +1,22 @@
 from flask import render_template, url_for, request
-from frontendapp import webapp, ip_list
+from frontendapp import webapp
 from flask import json
 from common import models
 import hashlib
 import json
+import requests
+from multiprocessing import Lock
+lock = Lock()
+ip_list = []
 
 @webapp.route('/memcaches/launched',methods=['POST'])
 def memcaches_launched():
     list_string = request.form.get("list_string")
     temp_list = json.loads(list_string)
+    lock.acquire()
     global ip_list
     ip_list = ip_list + temp_list
+    lock.release()
     data = {"success": "true"}
     response = webapp.response_class(
             response=json.dumps(data),
@@ -22,9 +28,11 @@ def memcaches_launched():
 @webapp.route('/memcaches/terminated',methods=['POST'])
 def memcaches_terminated():
     terminate_num = int(request.form.get("terminate_num"))
+    lock.acquire()
     global ip_list
     if terminate_num <= len(ip_list):
         ip_list = ip_list[:-terminate_num]
+        lock.release()
         data = {"success": "true"}
         response = webapp.response_class(
                 response=json.dumps(data),
@@ -32,6 +40,7 @@ def memcaches_terminated():
                 mimetype='application/json'
             )
         return response
+    lock.release()
     data = {"error": {"code" : "400", "message":"terminate_num > len(ip_list)"},
             "success":"false"}
     response = webapp.response_class(
@@ -49,8 +58,10 @@ def key_hash_int_ip():
     result = int(hexvalue,16)
     num_cycle = result%16
     ip_address = ""
+    lock.acquire()
     global ip_list
     if len(ip_list) < 1:
+        lock.release()
         data = {"ip_address": ip_address}
         response = webapp.response_class(
                 response=json.dumps(data),
@@ -61,6 +72,7 @@ def key_hash_int_ip():
     else:
         ip_id = num_cycle%len(ip_list)
         ip_address = ip_list[ip_id]
+        lock.release()
         data = {"ip_address": ip_address, "ip_id": str(ip_id)}
         response = webapp.response_class(
                 response=json.dumps(data),
@@ -68,3 +80,21 @@ def key_hash_int_ip():
                 mimetype='application/json'
             )
         return response
+
+@webapp.route('/memcaches/invalidateKey',methods=['POST'])
+def memcaches_invalidateKey():
+    key = request.form.get('key')
+    lock.acquire()
+    global ip_list
+    for ip_address in ip_list:
+        try:
+            requests.post(ip_address+"/invalidateKey", data={'key':key,}, timeout=0.5)
+        except requests.Timeout:
+            pass
+    lock.release()        
+    response = webapp.response_class(
+        response=json.dumps("OK"),
+        status=200,
+        mimetype='application/json'
+    )
+    return response     

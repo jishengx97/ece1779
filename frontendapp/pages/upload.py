@@ -51,7 +51,7 @@ def upload_save():
         client.put_object(Body=new_file, Bucket=s3_bucket_name, Key='test/'+new_file.filename)
         # new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
         result.first().file_location = "test/"+new_file.filename
-        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
+        r = requests.post("http://127.0.0.1:5000/memcaches/invalidateKey", data={'key':key_input,})
         if r.status_code == 200:
             error_msg = "Key already exists, updated image."
         else:
@@ -74,8 +74,7 @@ def upload_save():
         # new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
         new_entry.file_location = "test/"+new_file.filename
         local_session.commit()
-
-        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
+        r = requests.post("http://127.0.0.1:5000/memcaches/invalidateKey", data={'key':key_input,})
         if r.status_code == 200:
             error_msg = "Successfully uploaded the key and image pair!"
         else:
