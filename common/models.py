@@ -22,38 +22,6 @@ class MemcacheConfig(Base):
         nullable=False
     )
 
-class MemcacheStats(Base):
-    __tablename__ = 'memcache_stats'
-    id = Column(
-        Integer, 
-        primary_key=True,
-        autoincrement=True
-    )
-    num_items = Column(
-        Integer,
-        nullable=False
-    )
-    total_size = Column(
-        Float,
-        nullable=False
-    )
-    num_requests_served = Column(
-        Integer,
-        nullable=False
-    )
-    num_reads_served = Column(
-        Integer,
-        nullable=False
-    )
-    num_reads_missed = Column(
-        Integer,
-        nullable=False
-    )
-    stats_timestamp = Column(
-        Time,
-        nullable=False
-    )
-
 class KeyAndFileLocation(Base):
     # key is unique, and file location is not.
     __tablename__ = 'key_and_file_location'
