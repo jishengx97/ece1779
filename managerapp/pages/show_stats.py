@@ -118,14 +118,18 @@ def show_stats():
         )
     
     # print("getting data")
-    response = cw_client.get_metric_data(
-        MetricDataQueries=metric_data_queries,
-        StartTime=current_time - timedelta(seconds=30*60),
-        EndTime=current_time,
-        LabelOptions={
-            'Timezone': '-0500'
-        },
-    )
+    try:
+        response = cw_client.get_metric_data(
+            MetricDataQueries=metric_data_queries,
+            StartTime=current_time - timedelta(seconds=30*60),
+            EndTime=current_time,
+            LabelOptions={
+                'Timezone': '-0500'
+            },
+        )
+    except:
+        error_msg = "No statistics found for memcache. Please check back as memcache populate more statistic entries!"
+        return render_template("pages/show_stats/show_stats.html", title = stats_title, error_msg=error_msg)
 
     # print (response)
 
@@ -202,27 +206,27 @@ def show_stats():
     plot_worker_result = []
     for x,y in zip(num_workers_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_worker_result.append([y.hour + y.minute/60, x])
+        plot_worker_result.append([y.timestamp()*1000, x])
     plot_miss_rate_result = []
     for x,y in zip(miss_rate_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_miss_rate_result.append([y.hour + y.minute/60, x])
+        plot_miss_rate_result.append([y.timestamp()*1000, x])
     plot_hit_rate_result = []
     for x,y in zip(hit_rate_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_hit_rate_result.append([y.hour + y.minute/60, x])
+        plot_hit_rate_result.append([y.timestamp()*1000, x])
     plot_num_items_result = []
     for x,y in zip(num_item_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_num_items_result.append([y.hour + y.minute/60, x])
+        plot_num_items_result.append([y.timestamp()*1000, x])
     plot_total_size_result = []
     for x,y in zip(current_size_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_total_size_result.append([y.hour + y.minute/60, x])
+        plot_total_size_result.append([y.timestamp()*1000, x])
     plot_num_requests_result = []
     for x,y in zip(num_request_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_num_requests_result.append([y.hour + y.minute/60, x])
+        plot_num_requests_result.append([y.timestamp()*1000, x])
     return render_template("pages/show_stats/show_stats.html", title = stats_title, start_time = str(utc_to_local(miss_rate_timestamp[0]).strftime("%X")),
         end_time = str(utc_to_local(miss_rate_timestamp[-1]).strftime("%X")), workers = plot_worker_result, miss_rate = plot_miss_rate_result, 
         hit_rate = plot_hit_rate_result, num_items = plot_num_items_result, 
