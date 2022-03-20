@@ -22,6 +22,37 @@ class MemcacheConfig(Base):
         nullable=False
     )
 
+class MemcachePoolResizeConfig(Base):
+    # This table has one and only one entry. managerapp will 
+    # ensure this at start and crash the app if this table
+    # contains more than one entry.
+    __tablename__ = 'memcache_pool_resize_configuration'
+    id = Column(
+        Integer, 
+        primary_key=True,
+        autoincrement=True
+    )
+    resize_mode = Column(
+        String(120), # either "Maunal" or "Automatic"
+        nullable=False
+    )
+    max_missrate_threshold = Column(
+        Float,
+        nullable=False
+    )
+    min_missrate_threshold = Column(
+        Float,
+        nullable=False
+    )
+    expand_ratio = Column(
+        Float,
+        nullable=False
+    )
+    shrink_ratio = Column(
+        Float,
+        nullable=False
+    )
+
 class KeyAndFileLocation(Base):
     # key is unique, and file location is not.
     __tablename__ = 'key_and_file_location'
