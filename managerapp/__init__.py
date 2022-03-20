@@ -17,7 +17,9 @@ memcache_info = {}
 frontend_info['InstanceId'] = config('FRONTEND_ID')
 memcache_info['InstanceId'] = config('MEMCACHE_ID')
 
-client = boto3.client('ec2', region_name='us-east-1')
+client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
 response = client.describe_instances(
     InstanceIds=[
         frontend_info['InstanceId'],
