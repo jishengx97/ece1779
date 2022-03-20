@@ -19,7 +19,9 @@ def main():
 def before_first_request_func():
     print('before_first_request function running')
     #launch the first memcache instance
-    # client = boto3.client('ec2', region_name='us-east-1')
+    # client = boto3.client('ec2',
+        # aws_access_key_id=config('AWSAccessKeyId'), 
+        # aws_secret_access_key=config('AWSSecretKey'))
     # response = client.run_instances(
     #     BlockDeviceMappings=[
     #         {

@@ -22,21 +22,39 @@ def key_save():
     if key_input == "":
         error_msg = "Missing key"
         return render_template("pages/key/key_form.html",title = key_title,error_msg = error_msg, img = None, img_file = None)
-
-    r = requests.post("http://127.0.0.1:5001/get", data={'key':key_input})
-
+    
     img = None
-    img_file = None
-    if r.status_code == 200:
-        error_msg = "Got the image from memcache directly! KEY=" + key_input
-        img = r.json()
-    else:
-        error_msg = "Key put to memcache! KEY=" + key_input
+    img_file = None    
+    r = requests.post("http://127.0.0.1:5000/memcaches/hash", data={'key_input':key_input})
+    r_dict = r.json()
+    ip_address = r_dict['ip_address']
+
+    if ip_address == '':
+        error_msg = "No memcaches yet! From S3 KEY=" + key_input
         local_session = webapp.db_session()
         client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
         result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
         if result.count() == 0:
-            error_msg = "Key does not exist!"
+            error_msg = error_msg + " ,Key does not exist!"
+            return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
+        obj = client.get_object(Bucket=s3_bucket_name, Key=result.first().file_location)
+        file_like_obj = io.BytesIO(obj['Body'].read())
+        img_file = base64.b64encode(file_like_obj.read()).decode()
+        return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
+
+    ip_id = r_dict['ip_id']
+    r = requests.post(ip_address+"/get", data={'key':key_input})
+
+    if r.status_code == 200:
+        error_msg = "Got the image from memcache" +ip_id+ " directly! KEY=" + key_input
+        img = r.json()
+    else:
+        error_msg = "Key put to memcache" +ip_id+ " From S3! KEY=" + key_input
+        local_session = webapp.db_session()
+        client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
+        result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
+        if result.count() == 0:
+            error_msg = error_msg + " ,Key does not exist!"
             return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
         # img_file_path, img_file = os.path.split(result.first().file_location)
 
@@ -47,12 +65,12 @@ def key_save():
         # img_binary2 = open(result.first().file_location,'rb')
         img_file = base64.b64encode(file_like_obj.read()).decode()
         file_like_obj.seek(0)
-        r = requests.post("http://127.0.0.1:5001/put", data={'key':key_input}, files={'image':file_like_obj})
+        r = requests.post(ip_address+"/put", data={'key':key_input}, files={'image':file_like_obj})
         # img_binary1.close()
         # img_binary2.close()
 
         if r.status_code != 200:
-            error_msg = r.json()
+            error_msg = error_msg + r.json()
     return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
 
 @webapp.route('/api/key/<key_value>',methods=['POST'])
