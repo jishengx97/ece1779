@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+    <ul>
+        <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
+    </ul>
+
+    <div>
+        {% if error_msg %}
+            {{error_msg}}
+        {% else %}
+            Displaying Statistics for the Memcache from {{ start_time }} to {{ end_time }} <br>
+            <h2>Number of Worksers</h2>
+
+            <div id="workers_plot" style="width:600px;height:300px"></div>
+
+            <h2>Miss Rate</h2>
+
+            <div id="miss_rate_plot" style="width:600px;height:300px"></div>
+
+            <h2>Hit Rate</h2>
+
+            <div id="hit_rate_plot" style="width:600px;height:300px"></div>
+
+            <h2>Number of Items</h2>
+
+            <div id="num_items_plot" style="width:600px;height:300px"></div>
+
+            <h2>Total Memcache Size</h2>
+
+            <div id="total_size_plot" style="width:600px;height:300px"></div>
+
+            <h2>Number of Requests</h2>
+
+            <div id="num_requests_plot" style="width:600px;height:300px"></div>
+
+        {% endif %}
+    </div>
+
+    <script>
+
+        var options = {
+            series: {
+                lines: { show: true },
+                points: { show: true }
+            }
+        };
+
+        $.plot($("#workers_plot"), [ {{ workers }} ] , options);
+        $.plot($("#miss_rate_plot"), [ {{ miss_rate }} ] , options);
+        $.plot($("#hit_rate_plot"), [ {{ hit_rate }} ] , options);
+        $.plot($("#num_items_plot"), [ {{ num_items }} ] , options);
+        $.plot($("#total_size_plot"), [ {{ total_size }} ] , options);
+        $.plot($("#num_requests_plot"), [ {{ num_requests }} ] , options);
+
+    </script>
+
+{% endblock %}
