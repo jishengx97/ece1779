@@ -35,31 +35,6 @@ def show_stats():
     metric_namespace = 'ece1779-a2-memcache-stats'
     dimension_name = 'InstanceID'
 
-    # get all the available dimensions
-    try:
-        metric_name = 'num_miss'
-        response = cw_client.list_metrics(
-            Namespace = metric_namespace,
-            MetricName = metric_name,
-            Dimensions = [
-                {
-                    'Name': 'InstanceID',
-                },
-            ],
-            RecentlyActive='PT3H'
-        )
-
-        print(response)
-        all_metrics = response['Metrics']
-        all_dimentions = []
-        for metric in all_metrics:
-            for dimension in metric['Dimensions']:
-                all_dimentions.append(dimension)
-    except:
-        assert False
-
-    print(all_dimentions)
-
     metric_name_num_miss = 'num_miss'
     metric_name_num_access = 'num_access'
     metric_name_num_request = 'num_request'
@@ -142,7 +117,7 @@ def show_stats():
             }
         )
     
-    print("getting data")
+    # print("getting data")
     response = cw_client.get_metric_data(
         MetricDataQueries=metric_data_queries,
         StartTime=current_time - timedelta(seconds=30*60),
@@ -152,7 +127,7 @@ def show_stats():
         },
     )
 
-    print (response)
+    # print (response)
 
     num_item_values = []
     num_item_timestamp = []
@@ -198,7 +173,7 @@ def show_stats():
         for num_access_item in num_access_result_list:
             num_access_label = num_access_item['Label']
             if num_miss_label.split()[0] == num_access_label.split()[0]:
-                print("found", num_miss_label, "is the same as", num_access_label)
+                # print("found", num_miss_label, "is the same as", num_access_label)
                 miss_rate_result = []
                 hit_rate_result = []
                 this_miss_value = num_miss_item['Values'][::-1]
@@ -210,20 +185,20 @@ def show_stats():
                     else:
                         miss_rate_result.append(miss/access*100)
                         hit_rate_result.append((access-miss)/access*100)
-                print("miss_rate_values", miss_rate_values)
-                print("hit_rate_values", hit_rate_values)
+                # print("miss_rate_values", miss_rate_values)
+                # print("hit_rate_values", hit_rate_values)
                 
                 miss_rate_values = [x+y for x, y in zip(miss_rate_values, miss_rate_result)]
                 hit_rate_values = [x+y for x, y in zip(hit_rate_values, hit_rate_result)]
     miss_rate_values = [x/y if y != 0 else 0 for x, y in zip(miss_rate_values, num_workers_values)]
     hit_rate_values = [x/y if y != 0 else 0 for x, y in zip(hit_rate_values, num_workers_values)]
         
-    print("num_workers_values", num_workers_values)
-    print("miss_rate_values", miss_rate_values)
-    print("hit_rate_values", hit_rate_values)
-    print("num_item_values", num_item_values)
-    print("current_size_values", current_size_values)
-    print("num_request_values", num_request_values)
+    # print("num_workers_values", num_workers_values)
+    # print("miss_rate_values", miss_rate_values)
+    # print("hit_rate_values", hit_rate_values)
+    # print("num_item_values", num_item_values)
+    # print("current_size_values", current_size_values)
+    # print("num_request_values", num_request_values)
     plot_worker_result = []
     for x,y in zip(num_workers_values, num_workers_timestamp):
         y = utc_to_local(y)
