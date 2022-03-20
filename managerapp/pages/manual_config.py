@@ -1,4 +1,4 @@
-from managerapp import webapp, current_pool_size,instance_pool
+from managerapp import webapp, current_pool_size,instance_pool,frontend_info
 from managerapp.pages import pool_stats
 import requests
 from flask import render_template, url_for, request
@@ -22,7 +22,9 @@ def manual_config():
 @webapp.route('/manual_config',methods=['POST'])
 def manual_config_post():
     # global current_pool_size
-    client = boto3.client('ec2', region_name='us-east-1')
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
     error_msg = ''
     ## check all memcache are ready, if not, do not expand or shrink pool
     for instance in reversed(instance_pool):
@@ -127,7 +129,9 @@ def check_launch_and_notify(instance_id):
     print("subprocess starts")
     # global pending_instance
     time.sleep(3) ### call describe_instances() right after run_instances() will get error, so we need to sleep a while, so AWS can initilize the new instance 
-    client = boto3.client('ec2', region_name='us-east-1')
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
     response = client.describe_instances(
         InstanceIds=[
             instance_id,
@@ -182,14 +186,29 @@ def check_launch_and_notify(instance_id):
 
 
     ######## notify frontend this new instance ########
+    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/launched", data={'list_string':json.dumps([ new_cache_ip ] ) })
+    if r.status_code == 200:
+        print('Successfully notify frontend '+frontend_info['IP']+' IP address of memcache '+ new_cache_ip)
+    else:
+        print('Error: Fail to send memcache ip to frontend.')
     
     ###################################################
 
 def notify_and_terminate(instance_id):
-    client = boto3.client('ec2', region_name='us-east-1')
-    while(0): ## notify frontend, until ready to terminate
-        time.sleep(5)
+   
+    ## notify frontend  ##########
 
+    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps( instance_id ) })
+    if r.status_code == 200:
+        print('Successfully notify frontend '+frontend_info['IP']+' to terminate the last '+ str(instance_id)+' instance.')
+    else:
+        print('Error: Fail to send terminate request to frontend.')
+
+    #########################################
+        
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
     response = client.terminate_instances(
         InstanceIds=[
             instance_id,

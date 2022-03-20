@@ -4,6 +4,7 @@ from flask import json
 from common import models
 import requests
 import boto3    
+from decouple import config
 config_title = "Change Memcache Configurations"
 choice1 = "Least Recently Used"
 choice2 = "Random"
@@ -35,7 +36,9 @@ def memcache_config_save():
 
     if (request.form['action'] == 'clear all memcache'):
         # send clear to all memcache in the pool
-        client = boto3.client('ec2', region_name='us-east-1')
+        client = boto3.client('ec2',
+            aws_access_key_id=config('AWSAccessKeyId'), 
+            aws_secret_access_key=config('AWSSecretKey'))
         error_msg = ''
         for instance in instance_pool:
             response = client.describe_instances(
@@ -84,7 +87,9 @@ def memcache_config_save():
     local_session.commit()
 
     # send refreshConfiguration to all memcache in the pool
-    client = boto3.client('ec2', region_name='us-east-1')
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
     error_msg = ''
     for instance in instance_pool:
         response = client.describe_instances(

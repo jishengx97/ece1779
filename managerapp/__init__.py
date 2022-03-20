@@ -5,6 +5,9 @@ from decouple import config
 import multiprocessing
 from decouple import config
 import boto3
+import requests
+from flask import json
+import sys
 # manager = multiprocessing.Manager()
 # instance_pool = manager.list()
 instance_pool = []
@@ -33,7 +36,14 @@ frontend_info['IP'] = response['Reservations'][0]['Instances'][0]['PublicIpAddre
 memcache_info['IP'] = response['Reservations'][1]['Instances'][0]['PublicIpAddress']
 instance_pool.append({'InstanceId':config('MEMCACHE_ID')})
 
-
+######notify frontend the first memcache
+r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/launched", data={'list_string':json.dumps([ memcache_info['IP'] ] ) })
+if r.status_code == 200:
+    print('Successfully notify frontend '+frontend_info['IP']+' IP address of memcache '+memcache_info['IP'])
+else:
+    print('Fail to send memcache ip to frontend. Exit.')
+    sys.exit(0)
+##########################################
 database.init_db()
 webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
