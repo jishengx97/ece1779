@@ -22,10 +22,43 @@ def manual_config():
 @webapp.route('/manual_config',methods=['POST'])
 def manual_config_post():
     # global current_pool_size
-
-    error_msg = None
-    action = request.form['action']
     client = boto3.client('ec2', region_name='us-east-1')
+    error_msg = ''
+    ## check all memcache are ready, if not, do not expand or shrink pool
+    for instance in reversed(instance_pool):
+        response = client.describe_instances(
+            InstanceIds=[
+                instance['InstanceId'],
+            ]
+        )
+        if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
+
+
+        cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+        print('cache IP is '+cache_ip)
+        
+        try:
+            r = requests.post("http://" + cache_ip + ":5000/is_running")
+        except:
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
+
+        if r.status_code == 200:
+            print("Memcache of "+instance['InstanceId']+" is running.")
+        else:
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
+
+
+    ################################
+
+    action = request.form['action']
+    
     if action == 'expand':
         if current_pool_size[0] >= 8:
             error_msg = 'Reach max pool size. Cannot expand more.'
@@ -140,7 +173,7 @@ def check_launch_and_notify(instance_id):
     ftp = client.open_sftp()
     ftp.put('/home/ubuntu/ece1779/.env', '/home/ubuntu/ece1779/.env')
 
-    stdin, stdout, stderr = client.exec_command('cd ece1779; chmod 700 start_memcache.sh; ./start_memcache.sh')
+    stdin, stdout, stderr = client.exec_command('cd ece1779; git checkout zihao-develop; chmod 700 start_memcache.sh; ./start_memcache.sh')
     print(stderr.readlines())
     print(stdout.readlines())
 

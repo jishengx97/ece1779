@@ -33,7 +33,7 @@ def memcache_config_save():
     init_policy = obj.replacement_policy
     init_capacity = obj.capacity_in_mb
 
-    if (request.form['action'] == 'clear cache'):
+    if (request.form['action'] == 'clear all memcache'):
         # send clear to all memcache in the pool
         client = boto3.client('ec2', region_name='us-east-1')
         error_msg = ''
@@ -52,6 +52,13 @@ def memcache_config_save():
                 error_msg += 'CLEAR  CACHE FOR INSTANCE ' + instance['InstanceId']
             else:
                 error_msg += r.json()
+        return render_template("pages/memcache_config/memcache_config.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
+    
+    if (request.form['action'] == 'clear S3 and RDS storage'):
+        error_msg = 'Clear S3 and RDS storage.'
+        ###############################
+        #send request to frontend to clear
+        ###############################
         return render_template("pages/memcache_config/memcache_config.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     
     
