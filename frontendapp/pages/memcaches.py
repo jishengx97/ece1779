@@ -42,16 +42,29 @@ def memcaches_terminated():
     return response
 
 @webapp.route('/memcaches/hash',methods=['POST'])
-def key_hash_int():
+def key_hash_int_ip():
     key_input = request.form.get("key_input")
     hashvalue = hashlib.md5(key_input.encode())
     hexvalue = hashvalue.hexdigest()
     result = int(hexvalue,16)
     num_cycle = result%16
-    data = {"success": "true","hashvalue": num_cycle}
-    response = webapp.response_class(
-            response=json.dumps(data),
-            status=200,
-            mimetype='application/json'
-        )
-    return response
+    ip_address = ""
+    global ip_list
+    if len(ip_list) < 1:
+        data = {"ip_address": ip_address}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=200,
+                mimetype='application/json'
+            )
+        return response
+    else:
+        ip_id = num_cycle%len(ip_list)
+        ip_address = ip_list[ip_id]
+        data = {"ip_address": ip_address, "ip_id": str(ip_id)}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=200,
+                mimetype='application/json'
+            )
+        return response
