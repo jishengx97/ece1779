@@ -348,6 +348,16 @@ def refreshConfiguration():
 
     return response
 
+@webapp.route('/is_running',methods=['POST'])
+def is_running():
+    response = webapp.response_class(
+        response=json.dumps("OK"),
+        status=200,
+        mimetype='application/json'
+    )
+
+    return response
+
 
 # functions to debug
 @webapp.route('/listall',methods=['POST'])
