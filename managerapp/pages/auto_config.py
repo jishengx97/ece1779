@@ -280,6 +280,47 @@ def check_launch_ready(instance_id):
 
 @webapp.route('/auto_config/shrink',methods=['POST'])
 def auto_config_shrink():
+    ## check all memcache are ready, if not, do not expand or shrink pool
+    for instance in reversed(instance_pool):
+        response = client.describe_instances(
+            InstanceIds=[
+                instance['InstanceId'],
+            ]
+        )
+        if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            response = webapp.response_class(
+                    response=json.dumps('OK'),
+                    status=200,
+                    mimetype='application/json'
+                )
+            return response
+
+        cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+        print('cache IP is '+cache_ip)
+        
+        try:
+            r = requests.post("http://" + cache_ip + ":5000/is_running")
+        except:
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            response = webapp.response_class(
+                    response=json.dumps('OK'),
+                    status=200,
+                    mimetype='application/json'
+                )
+            return response
+        if r.status_code == 200:
+            print("Memcache of "+instance['InstanceId']+" is running.")
+        else:
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            response = webapp.response_class(
+                    response=json.dumps('OK'),
+                    status=200,
+                    mimetype='application/json'
+                )
+            return response
+
+    ################################
     shrink_ratio = float(request.form.get("ratio"))
     print("We have "+str(current_pool_size[0])+" instances currently.")
     pool_size_after_shrink = current_pool_size[0] * shrink_ratio
