@@ -1,11 +1,13 @@
 from flask import render_template, url_for, request
-from frontendapp import webapp
+from frontendapp import webapp, lock_S3, lock_RDS, s3_bucket_name
 from flask import json
 from common import models
 import hashlib
 import json
 import requests
+from decouple import config
 from multiprocessing import Lock
+import boto3
 lock = Lock()
 ip_list = []
 
@@ -97,4 +99,34 @@ def memcaches_invalidateKey():
         status=200,
         mimetype='application/json'
     )
-    return response     
+    return response
+
+@webapp.route('/memcaches/delete_all_image',methods=['POST'])
+def memcaches_delete_all_image():
+    lock.acquire()
+    lock_RDS.acquire()
+    lock_S3.acquire()
+
+    s3 = boto3.resource('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
+    bucket = s3.Bucket(s3_bucket_name)
+    bucket.objects.all().delete()
+
+    local_session = webapp.db_session() 
+    result_count = local_session.query(models.KeyAndFileLocation).delete() 
+    local_session.commit()
+
+    global ip_list
+    for ip_address in ip_list:
+        try:
+            requests.post(ip_address+"/clear", timeout=0.5)
+        except requests.Timeout:
+            pass
+    lock.release() 
+    lock_RDS.release() 
+    lock_S3.release()     
+    response = webapp.response_class(
+        response=json.dumps("OK"),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
