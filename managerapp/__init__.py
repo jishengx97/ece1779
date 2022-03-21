@@ -29,11 +29,14 @@ response = client.describe_instances(
         memcache_info['InstanceId'],
     ]
 )
-frontend_info['DNS'] = response['Reservations'][0]['Instances'][0]['PublicDnsName']
-memcache_info['DNS'] = response['Reservations'][1]['Instances'][0]['PublicDnsName']
 
-frontend_info['IP'] = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
-memcache_info['IP'] = response['Reservations'][1]['Instances'][0]['PublicIpAddress']
+for reservation in response['Reservations']:
+    if reservation['Instances'][0]['InstanceId'] == frontend_info['InstanceId']:
+        frontend_info['DNS'] = reservation['Instances'][0]['PublicDnsName']
+        frontend_info['IP'] = reservation['Instances'][0]['PublicIpAddress']
+    elif reservation['Instances'][0]['InstanceId'] == memcache_info['InstanceId']:
+        memcache_info['DNS'] = reservation['Instances'][0]['PublicDnsName']
+        memcache_info['IP'] = reservation['Instances'][0]['PublicIpAddress']
 instance_pool.append({'InstanceId':config('MEMCACHE_ID')})
 
 ######notify frontend the first memcache
