@@ -79,11 +79,7 @@ def manual_config_post():
         assert False, "the MemcachePoolResizeConfig table should have only one entry!"
     else:
         result = local_session.query(models.MemcachePoolResizeConfig).first()
-        result.resize_mode = 'Manual',
-        result.max_missrate_threshold = 80,
-        result.min_missrate_threshold = 20,
-        result.expand_ratio = 2,
-        result.shrink_ratio = 0.5,
+        result.resize_mode = 'Manual'
         local_session.commit()
 
     action = request.form['action']
