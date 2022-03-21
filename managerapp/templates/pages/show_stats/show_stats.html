@@ -4,10 +4,12 @@
         <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
     </ul>
 
-    <div>
-        {% if error_msg %}
-            {{error_msg}}
-        {% else %}
+    {% if error_msg != None %}
+        <div class="error">
+            {{ error_msg }}
+        </div>
+    {% else %} 
+        <div>
             Displaying Statistics for the Memcache from {{ start_time }} to {{ end_time }} <br>
             <h2>Number of Worksers</h2>
 
@@ -33,8 +35,8 @@
 
             <div id="num_requests_plot" style="width:600px;height:300px"></div>
 
-        {% endif %}
-    </div>
+        </div>   
+    {% endif %}
 
     <script>
 
