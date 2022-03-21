@@ -1,4 +1,4 @@
-from managerapp import webapp, current_pool_size,instance_pool,frontend_info
+from managerapp import webapp, current_pool_size,instance_pool,frontend_info,config_mode
 from managerapp.pages import pool_stats
 import requests
 from flask import render_template, url_for, request
@@ -11,10 +11,12 @@ from decouple import config
 from multiprocessing.dummy import Process
 import time
 import paramiko
+from common import models
 
 @webapp.route('/manual_config',methods=['GET'])
 def manual_config():
     print(instance_pool)
+    print(config_mode)
     # global current_pool_size
     return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = None)
 
@@ -58,9 +60,33 @@ def manual_config_post():
 
 
     ################################
+    
+    config_mode['mode'] = 'Manual'
+
+    local_session = webapp.db_session()
+    result_count = local_session.query(models.MemcachePoolResizeConfig).count()
+    if(result_count == 0):
+        new_entry = models.MemcachePoolResizeConfig(
+            resize_mode = 'Manual',
+            max_missrate_threshold = 80,
+            min_missrate_threshold = 20,
+            expand_ratio = 2,
+            shrink_ratio = 0.5,
+        )
+        local_session.add(new_entry)
+        local_session.commit()
+    elif(result_count > 1):
+        assert False, "the MemcachePoolResizeConfig table should have only one entry!"
+    else:
+        result = local_session.query(models.MemcachePoolResizeConfig).first()
+        result.resize_mode = 'Manual',
+        result.max_missrate_threshold = 80,
+        result.min_missrate_threshold = 20,
+        result.expand_ratio = 2,
+        result.shrink_ratio = 0.5,
+        local_session.commit()
 
     action = request.form['action']
-    
     if action == 'expand':
         if current_pool_size[0] >= 8:
             error_msg = 'Reach max pool size. Cannot expand more.'

@@ -337,6 +337,19 @@ def refreshConfiguration():
     policy = obj.replacement_policy
     capacity = obj.capacity_in_mb
 
+
+    while current_size > capacity * 1024 * 1024:
+        if policy == 'LRU':
+            least_recent_entry = memcache.popitem(last = False) 
+            current_size -= sys.getsizeof(least_recent_entry[1])
+            num_item -= 1
+        else:
+            removekey = random.choice(list(memcache.keys()))
+            current_size -= sys.getsizeof(memcache[removekey])
+            memcache.pop(removekey)
+            num_item -= 1
+
+
     response = webapp.response_class(
         response=json.dumps("OK"),
         status=200,

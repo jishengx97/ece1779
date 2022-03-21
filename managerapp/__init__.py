@@ -16,6 +16,8 @@ webapp.url_map.strict_slashes = False
 current_pool_size = [1]
 frontend_info = {}
 memcache_info = {}
+config_mode = {}
+config_mode['mode'] = 'Manual'
 
 frontend_info['InstanceId'] = config('FRONTEND_ID')
 memcache_info['InstanceId'] = config('MEMCACHE_ID')
@@ -47,9 +49,9 @@ else:
 database.init_db()
 webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_stack.__ident_func__)
 
-from managerapp import initialize_db
-initialize_db.set_db_default_values()
+# from managerapp import initialize_db
+# initialize_db.set_db_default_values()
 from managerapp import main
-from managerapp.pages import pool_stats, manual_config, memcache_config, show_stats
+from managerapp.pages import pool_stats, manual_config, memcache_config, show_stats, auto_config
 
 
