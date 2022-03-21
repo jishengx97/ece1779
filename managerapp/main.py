@@ -5,12 +5,11 @@ from flask import json
 import boto3   
 import time
 import paramiko
+import requests
+from multiprocessing.dummy import Process
 
 @webapp.route('/',methods=['GET'], strict_slashes=False)
 def main():
-    # print(instance_pool)
-    # print(frontend_info)
-    # print(memcache_info)
 
     return render_template("main.html",title = "Welcome to cache manager")
 
@@ -89,4 +88,6 @@ def disable_cache(response):
 #@webapp.teardown_appcontext
 #def teardown_db(exception=None):
 #    webapp.db_session.remove()
+
+
 

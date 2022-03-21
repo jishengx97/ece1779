@@ -23,7 +23,32 @@ def manual_config():
 
 @webapp.route('/manual_config',methods=['POST'])
 def manual_config_post():
-    # global current_pool_size
+
+    ### switch to manual mode
+    config_mode['mode'] = 'Manual'
+
+    local_session = webapp.db_session()
+    result_count = local_session.query(models.MemcachePoolResizeConfig).count()
+    if(result_count == 0):
+        new_entry = models.MemcachePoolResizeConfig(
+            resize_mode = 'Manual',
+            max_missrate_threshold = 80,
+            min_missrate_threshold = 20,
+            expand_ratio = 2,
+            shrink_ratio = 0.5,
+        )
+        local_session.add(new_entry)
+        local_session.commit()
+    elif(result_count > 1):
+        assert False, "the MemcachePoolResizeConfig table should have only one entry!"
+    else:
+        result = local_session.query(models.MemcachePoolResizeConfig).first()
+        result.resize_mode = 'Manual'
+        local_session.commit()
+
+    
+
+
     client = boto3.client('ec2',
         aws_access_key_id=config('AWSAccessKeyId'), 
         aws_secret_access_key=config('AWSSecretKey'))
@@ -61,26 +86,7 @@ def manual_config_post():
 
     ################################
     
-    config_mode['mode'] = 'Manual'
-
-    local_session = webapp.db_session()
-    result_count = local_session.query(models.MemcachePoolResizeConfig).count()
-    if(result_count == 0):
-        new_entry = models.MemcachePoolResizeConfig(
-            resize_mode = 'Manual',
-            max_missrate_threshold = 80,
-            min_missrate_threshold = 20,
-            expand_ratio = 2,
-            shrink_ratio = 0.5,
-        )
-        local_session.add(new_entry)
-        local_session.commit()
-    elif(result_count > 1):
-        assert False, "the MemcachePoolResizeConfig table should have only one entry!"
-    else:
-        result = local_session.query(models.MemcachePoolResizeConfig).first()
-        result.resize_mode = 'Manual'
-        local_session.commit()
+    
 
     action = request.form['action']
     if action == 'expand':
@@ -220,23 +226,24 @@ def notify_and_terminate(instance_id):
    
     ## notify frontend  ##########
 
-    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps( instance_id ) })
+    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps( '1' ) })
     if r.status_code == 200:
         print('Successfully notify frontend '+frontend_info['IP']+' to terminate the last '+ str(instance_id)+' instance.')
+        client = boto3.client('ec2',
+            aws_access_key_id=config('AWSAccessKeyId'), 
+            aws_secret_access_key=config('AWSSecretKey'))
+        response = client.terminate_instances(
+            InstanceIds=[
+                instance_id,
+            ]
+        )
+        print("terminated instance "+instance_id)
     else:
-        print('Error: Fail to send terminate request to frontend.')
+        print('Error: frontend disagrees to termiate instance.')
 
     #########################################
         
-    client = boto3.client('ec2',
-        aws_access_key_id=config('AWSAccessKeyId'), 
-        aws_secret_access_key=config('AWSSecretKey'))
-    response = client.terminate_instances(
-        InstanceIds=[
-            instance_id,
-        ]
-    )
-    print("terminated instance "+instance_id)
+    
 
 
     
