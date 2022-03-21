@@ -18,8 +18,10 @@ def list_keys_form():
 
 @webapp.route('/api/list_keys',methods=['POST'])
 def test_list_keys():
+    lock_RDS.acquire()
     local_session = webapp.db_session()
     result = local_session.query(models.KeyAndFileLocation)
+    lock_RDS.release()
     key_list = []
     for r in result:
         key_list.append(r.key)
