@@ -12,17 +12,17 @@
         <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
     </ul>   
     <table>
-        <thead>
+      <thead>
+        <tr>
+          <th>KEYS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for list in lists %}
           <tr>
-            <th>KEYS</th>
+            <td>{{ list.key }}</td>
           </tr>
-        </thead>
-        <tbody>
-          {% for list in lists %}
-            <tr>
-              <td>{{ list.key }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        {% endfor %}
+      </tbody>
+    </table> 
 {% endblock %}
