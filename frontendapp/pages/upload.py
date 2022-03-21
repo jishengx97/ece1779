@@ -1,6 +1,6 @@
 import requests
 from flask import render_template, url_for, request
-from frontendapp import webapp, s3_bucket_name
+from frontendapp import webapp, s3_bucket_name, lock_S3, lock_RDS
 from flask import json
 import os
 from common import models
@@ -40,6 +40,8 @@ def upload_save():
     if (file_extension.lower() in ALLOWED_EXTENSIONS) == False:
         error_msg = "Only .jpg, .jpeg, .png and .gif formats are allowed!"
         return render_template("pages/upload/upload_form.html", title = upload_title, error_msg = error_msg)
+    lock_RDS.acquire()
+    lock_S3.acquire()
     local_session = webapp.db_session()
     client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
     result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
@@ -79,6 +81,8 @@ def upload_save():
             error_msg = "Successfully uploaded the key and image pair!"
         else:
             error_msg = r.json()
+    lock_RDS.release()
+    lock_S3.release()       
     return render_template("pages/upload/upload_form.html", title = upload_title, error_msg = error_msg)
 
 
