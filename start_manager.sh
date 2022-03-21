@@ -29,4 +29,6 @@ echo "> Starting the manager app on port 5000"
 gunicorn --bind 0.0.0.0:5000 --timeout 0 --workers=1 --threads=2 --capture-output --log-level debug run_managerapp:webapp &> managerapp_log.txt &
 
 # Wait a bit to allow setup to properly finish
-sleep 2
+sleep 5
+
+python3 auto_scaler.py &> auto_scaler_log.txt &
