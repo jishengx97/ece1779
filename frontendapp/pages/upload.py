@@ -117,35 +117,36 @@ def test_upload():
             )
         return response
 
+    lock_RDS.acquire()
+    lock_S3.acquire()
     local_session = webapp.db_session()
-    file_filename, file_extension = os.path.splitext(new_file.filename)
-    result = webapp.db_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
+    client = boto3.client('s3',aws_access_key_id=config('AWSAccessKeyId'), aws_secret_access_key=config('AWSSecretKey'))
+    result = local_session.query(models.KeyAndFileLocation).filter(models.KeyAndFileLocation.key == key_input)
     if(result.count() == 1):
         # key exists, update file, send invalidate request
-        os.remove(result.first().file_location)
+        client.delete_object(Bucket=s3_bucket_name, Key=result.first().file_location)
         new_file.filename = str(result.first().id)+file_extension 
-        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
-        result.first().file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
-        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
+        client.put_object(Body=new_file, Bucket=s3_bucket_name, Key='test/'+new_file.filename)
+        result.first().file_location = "test/"+new_file.filename
+        r = requests.post("http://127.0.0.1:5000/memcaches/invalidateKey", data={'key':key_input,})
         
     else:
         # key doesn't exist, create new entry
         new_entry = models.KeyAndFileLocation(
             key = key_input,
-            file_location = "/home/ubuntu/ece1779/images"
+            file_location = "wangha78"
         )
         local_session.add(new_entry)
         local_session.commit()
         # must refresh before accessing
         local_session.refresh(new_entry)
-        if not os.path.exists("/home/ubuntu/ece1779/images"):
-            os.makedirs("/home/ubuntu/ece1779/images")
         new_file.filename = str(new_entry.id)+file_extension    
-        new_file.save(os.path.join("/home/ubuntu/ece1779/images", new_file.filename))
-        new_entry.file_location = "/home/ubuntu/ece1779/images/"+new_file.filename
+        client.put_object(Body=new_file, Bucket=s3_bucket_name, Key='test/'+new_file.filename)
+        new_entry.file_location = "test/"+new_file.filename
         local_session.commit()
-        r = requests.post("http://127.0.0.1:5001/invalidateKey", data={'key':key_input,})
-
+        r = requests.post("http://127.0.0.1:5000/memcaches/invalidateKey", data={'key':key_input,})
+    lock_RDS.release()
+    lock_S3.release()
     data = {"success": "true"}
     response = webapp.response_class(
             response=json.dumps(data),
