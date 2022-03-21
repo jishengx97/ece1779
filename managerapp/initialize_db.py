@@ -8,6 +8,7 @@ def set_db_default_values():
     
     # ensure that the MemcacheConfig table has one and only one
     # entry
+    local_session = webapp.db_session()
     memcache_config_default_capacity = 2.0
     memcache_config_default_replacement_policy = "LRU"
     result_count = local_session.query(models.MemcacheConfig).count()
