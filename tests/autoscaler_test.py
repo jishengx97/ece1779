@@ -1,5 +1,6 @@
 import requests
 import hashlib
+import time
 IMAGE_DIR = 'images/'
 
 def test():
@@ -7,7 +8,25 @@ def test():
     # cycle for 'a' is 1 %4 is 1
     # cycle for 'e' is 2 %4 is 2
     # cycle for 'b' is 15 %4 is 3
-    pass
+    image_jpeg = open(IMAGE_DIR+'jpegtest.jpeg', 'rb')
+    keys = ['s', 'a', 'e', 'b']
+    for key in keys:
+        value = {"key":key}
+        response = requests.post("http://127.0.0.1:5000/api/upload", data=value,files={"file":image_jpeg})
+
+    while True:
+        for key in keys:
+            response = request.post("http://127.0.0.1:5000/api/key/"+key)
+            try:
+                response_data = response.json()
+                if (response_data.get("success") == "true"):
+                    pass
+                else:
+                    print("get image not success, response=", response)
+            except:
+                print("get image failed for unknown reaseon, response=", response)
+
+            time.sleep(2)
 
 
 def main():
