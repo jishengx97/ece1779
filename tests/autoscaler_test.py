@@ -14,13 +14,24 @@ def test():
         value = {"key":key}
         response = requests.post("http://127.0.0.1:5000/api/upload", data=value,files={"file":image_jpeg})
 
+        try:
+            response_data = response.json()
+            if (response_data.get("success") == "true"):
+                print("uploaded key", key)
+            else:
+                print("failed to upload key", key)
+        except:
+            print("failed to upload key", key)
+
+    count = 0
     while True:
         for key in keys:
             response = request.post("http://127.0.0.1:5000/api/key/"+key)
+            count += 1
             try:
                 response_data = response.json()
                 if (response_data.get("success") == "true"):
-                    pass
+                    print("round", count, "succeeded")
                 else:
                     print("get image not success, response=", response)
             except:
