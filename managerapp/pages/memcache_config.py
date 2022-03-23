@@ -1,5 +1,5 @@
 from flask import render_template, url_for, request
-from managerapp import webapp, current_pool_size,instance_pool
+from managerapp import webapp, current_pool_size,instance_pool,frontend_info
 from flask import json
 from common import models
 import requests
@@ -61,6 +61,7 @@ def memcache_config_save():
         error_msg = 'Clear S3 and RDS storage.'
         ###############################
         #send request to frontend to clear
+        r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/delete_all_image")
         ###############################
         return render_template("pages/memcache_config/memcache_config.html", title = config_title, policys = [choice1, choice2], init_capacity = init_capacity, init_policy = init_policy, error_msg = error_msg)
     
