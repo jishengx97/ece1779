@@ -90,7 +90,7 @@ def memcaches_invalidateKey():
     global ip_list
     for ip_address in ip_list:
         try:
-            requests.post(ip_address+"/invalidateKey", data={'key':key,}, timeout=0.5)
+            requests.post("http://" + ip_address + "/invalidateKey", data={'key':key,}, timeout=0.5)
         except requests.Timeout:
             pass
     lock.release()        
@@ -118,7 +118,7 @@ def memcaches_delete_all_image():
     global ip_list
     for ip_address in ip_list:
         try:
-            requests.post(ip_address+"/clear", timeout=0.5)
+            requests.post("http://" + ip_address + "/clear", timeout=0.5)
         except requests.Timeout:
             pass
     lock.release() 

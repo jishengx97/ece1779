@@ -47,7 +47,7 @@ def key_save():
         return render_template("pages/key/key_form.html", title = key_title, error_msg = error_msg, img = img, img_file = img_file)
 
     ip_id = r_dict['ip_id']
-    r = requests.post(ip_address+"/get", data={'key':key_input})
+    r = requests.post("http://" + ip_address + "/get", data={'key':key_input})
 
     if r.status_code == 200:
         error_msg = "Got the image from memcache" +ip_id+ " directly! KEY=" + key_input
@@ -73,7 +73,7 @@ def key_save():
         # img_binary2 = open(result.first().file_location,'rb')
         img_file = base64.b64encode(file_like_obj.read()).decode()
         file_like_obj.seek(0)
-        r = requests.post(ip_address+"/put", data={'key':key_input}, files={'image':file_like_obj})
+        r = requests.post("http://" + ip_address + "/put", data={'key':key_input}, files={'image':file_like_obj})
         # img_binary1.close()
         # img_binary2.close()
 
@@ -90,7 +90,7 @@ def test_key(key_value):
     r_dict = r.json()
     ip_address = r_dict['ip_address']
     if ip_address != '':
-        r = requests.post(ip_address+"/get", data={'key':key_input})
+        r = requests.post("http://" + ip_address + "/get", data={'key':key_input})
         if r.status_code == 200:
             error_msg = "Got the image from memcache directly!"
             img = r.json()
@@ -117,7 +117,7 @@ def test_key(key_value):
         img = base64.b64encode(file_like_obj.read()).decode()
         file_like_obj.seek(0)
         if ip_address != '':
-            r = requests.post(ip_address+"/put", data={'key':key_input}, files={'image':file_like_obj})
+            r = requests.post("http://" + ip_address + "/put", data={'key':key_input}, files={'image':file_like_obj})
         if r.status_code != 200:
             data = {"error": {"code" : "400", "message":"image size is larger than cache capacity."},
                     "success":"false"}
