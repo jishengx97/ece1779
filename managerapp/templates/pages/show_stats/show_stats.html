@@ -52,6 +52,7 @@
                 points: { show: true },
             },
             xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
+            yaxis: { min: 0, },
         };
         var percent_options = {
             series: {
@@ -59,7 +60,7 @@
                 points: { show: true },
             },
             xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
-            yaxis: { tickFormatter: plus_percent, },
+            yaxis: { tickFormatter: plus_percent, min: 0, },
         };
         var kb_options = {
             series: {
@@ -67,7 +68,7 @@
                 points: { show: true },
             },
             xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
-            yaxis: { tickFormatter: plus_kb, },
+            yaxis: { tickFormatter: plus_kb, min: 0, },
         };
 
         $.plot($("#workers_plot"),[  {{ workers }} ], options);
