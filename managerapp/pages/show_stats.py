@@ -15,14 +15,11 @@ import boto3
 from botocore.exceptions import ClientError
 from decouple import config
 import re
-from auto_config import is_float
 stats_title = "Memcache Statistics"
 
 def utc_to_local(utc_dt):
     eastern = timezone('US/Eastern')
     local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(eastern)
-    if is_float(utc_dt):
-        print("is float!")
     return local_dt
 
 @webapp.route('/show_stats',methods=['GET', 'POST'])
@@ -35,8 +32,6 @@ def show_stats():
     )
     eastern = timezone('US/Eastern')
     current_time = datetime.now(eastern)
-    if is_float(current_time):
-        print("is float!")
     metric_namespace = 'ece1779-a2-memcache-stats'
     dimension_name = 'InstanceID'
 
