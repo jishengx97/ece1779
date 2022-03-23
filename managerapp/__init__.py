@@ -55,6 +55,6 @@ webapp.db_session = scoped_session(database.SessionLocal, scopefunc=_app_ctx_sta
 from managerapp import initialize_db
 initialize_db.set_db_default_values(memcache_info['IP'])
 from managerapp import main
-from managerapp.pages import pool_stats, manual_config, memcache_config, show_stats, auto_config
+from managerapp.pages import pool_stats, manual_config, memcache_config, show_stats, auto_config, pool_config
 
 
