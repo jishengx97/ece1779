@@ -74,6 +74,7 @@ def key_hash_int_ip():
     else:
         ip_id = num_cycle%len(ip_list)
         ip_address = ip_list[ip_id]
+        print("sending key", key_input, "to ip_id", ip_id)
         lock.release()
         data = {"ip_address": ip_address, "ip_id": str(ip_id)}
         response = webapp.response_class(
