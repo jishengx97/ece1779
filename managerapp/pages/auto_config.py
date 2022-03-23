@@ -23,6 +23,7 @@ def is_float(element):
 @webapp.route('/auto_config',methods=['GET'])
 def auto_config():
     print(config_mode)
+    print(instance_pool)
     return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = None,
                             max_mr_th = '80', min_mr_th='20', expand_ratio='2', shrink_ratio='0.5')
@@ -111,6 +112,7 @@ def auto_config_post():
 def auto_config_expand():
     
     expand_ratio = float(request.form.get("ratio"))
+#     expand_ratio = 2.0
     print("We have "+str(current_pool_size[0])+" instances currently.")
     pool_size_after_expand = current_pool_size[0] * expand_ratio
     pool_size_after_expand = int(round(pool_size_after_expand))
@@ -169,8 +171,39 @@ def auto_config_expand():
     print("after expand, current_pool_size", current_pool_size[0])
 
 
-    p = Process(target=subprocess_manager, args= (new_instance, ))
-    p.start()
+    # p = Process(target=subprocess_manager, args= (new_instance, ))
+    # p.start()
+
+    proc = []
+
+    for instance in new_instance:
+        p = Process(target=check_launch_ready, args= (instance, ))
+        print('started checking for'+ instance)
+        p.start()
+        proc.append(p)
+    for p in proc:
+        p.join()
+    print("***all instance setup finish, ready to notify frontend.")
+
+    ip_list = []
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
+    for instance in new_instance:
+        response = client.describe_instances(
+            InstanceIds=[
+                instance,
+            ]
+        )
+        ip_list.append(response['Reservations'][0]['Instances'][0]['PublicIpAddress'])
+    ######## notify frontend this new instance ########
+    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/launched", data={'list_string':json.dumps(ip_list ) })
+    if r.status_code == 200:
+        print('Successfully notify frontend '+frontend_info['IP']+' IP address of memcache ')
+        print(new_instance)
+        print(ip_list)
+    else:
+        print('Error: Fail to send memcache ip to frontend.')
 
     response = webapp.response_class(
                 response=json.dumps('OK'),
@@ -280,48 +313,63 @@ def check_launch_ready(instance_id):
 
 @webapp.route('/auto_config/shrink',methods=['POST'])
 def auto_config_shrink():
+    global instance_pool
+    client = boto3.client('ec2',
+        aws_access_key_id=config('AWSAccessKeyId'), 
+        aws_secret_access_key=config('AWSSecretKey'))
     ## check all memcache are ready, if not, do not expand or shrink pool
-    for instance in reversed(instance_pool):
-        response = client.describe_instances(
-            InstanceIds=[
-                instance['InstanceId'],
-            ]
-        )
-        if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
-            response = webapp.response_class(
-                    response=json.dumps('OK'),
-                    status=200,
-                    mimetype='application/json'
-                )
-            return response
+    all_ready = False
+    while all_ready == False:
+        all_ready = True
+        for instance in reversed(instance_pool):
+            response = client.describe_instances(
+                InstanceIds=[
+                    instance['InstanceId'],
+                ]
+            )
+            if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
+                print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+                all_ready = False
+                break
+                # response = webapp.response_class(
+                #         response=json.dumps('OK'),
+                #         status=200,
+                #         mimetype='application/json'
+                #     )
+                # return response
 
-        cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
-        print('cache IP is '+cache_ip)
-        
-        try:
-            r = requests.post("http://" + cache_ip + ":5000/is_running")
-        except:
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
-            response = webapp.response_class(
-                    response=json.dumps('OK'),
-                    status=200,
-                    mimetype='application/json'
-                )
-            return response
-        if r.status_code == 200:
-            print("Memcache of "+instance['InstanceId']+" is running.")
-        else:
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
-            response = webapp.response_class(
-                    response=json.dumps('OK'),
-                    status=200,
-                    mimetype='application/json'
-                )
-            return response
+            cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
+            print('cache IP is '+cache_ip)
+            
+            try:
+                r = requests.post("http://" + cache_ip + ":5000/is_running")
+            except:
+                print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+                all_ready = False
+                break
+                # response = webapp.response_class(
+                #         response=json.dumps('OK'),
+                #         status=200,
+                #         mimetype='application/json'
+                #     )
+                # return response
+            if r.status_code == 200:
+                print("Memcache of "+instance['InstanceId']+" is running.")
+            else:
+                print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+                all_ready = False
+                break
+                # response = webapp.response_class(
+                #         response=json.dumps('OK'),
+                #         status=200,
+                #         mimetype='application/json'
+                #     )
+                # return response
+        time.sleep(5)
 
     ################################
     shrink_ratio = float(request.form.get("ratio"))
+#     shrink_ratio = 0.5
     print("We have "+str(current_pool_size[0])+" instances currently.")
     pool_size_after_shrink = current_pool_size[0] * shrink_ratio
 
@@ -339,8 +387,14 @@ def auto_config_shrink():
                 )
         return response
     current_pool_size[0] = current_pool_size[0] - instance_to_terminate
-    terminate_id = instance_pool[-instance_to_terminate:]
-    instance_pool = instance_pool[0:-instance_to_terminate]
+    i = instance_to_terminate
+    terminate_id = []
+    while i > 0:
+        terminate_id.append(instance_pool[-1]['InstanceId']) 
+        instance_pool.pop()
+        i = i -1
+    # terminate_id = instance_pool[-instance_to_terminate:]
+    # instance_pool = instance_pool[0:-instance_to_terminate]
 
 
     r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps( instance_to_terminate ) })
@@ -351,10 +405,10 @@ def auto_config_shrink():
         for id in terminate_id:
             response = client.terminate_instances(
                 InstanceIds=[
-                    id['InstanceId'],
+                    id,
                 ]
             )
-            print("terminated instance "+id['InstanceId'])
+            print("terminated instance "+id)
         
     else:
         print('Error: frontend disagrees to termiate instance.')

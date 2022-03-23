@@ -17,7 +17,7 @@
         You can switch to automatic model by submitting these parameters.
     </ul>
 
-    
+
     <form action="{{url_for('auto_config_post')}}"  enctype="multipart/form-data" method="post">
         Max Missrate Threshold <br/><input type="string" name="max_missrate_th" value = "{{ max_mr_th }}">(between 0 to 100)<br/><br/>
         Min Missrate Threshold <br/><input type="string" name="min_missrate_th" value = "{{ min_mr_th }}">(between 0 to 100)<br/><br/>
