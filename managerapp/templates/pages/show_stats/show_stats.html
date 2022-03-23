@@ -39,6 +39,12 @@
     </div>
 
     <script>
+        plus_percent = function(val, axis){
+            return val + "%"
+        };
+        plus_kb = function(val, axis){
+            return val + "KB"
+        };
 
         var options = {
             series: {
@@ -47,13 +53,29 @@
             },
             xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
         };
+        var percent_options = {
+            series: {
+                lines: { show: true },
+                points: { show: true },
+            },
+            xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
+            yaxis: { tickFormatter: plus_percent, },
+        };
+        var kb_options = {
+            series: {
+                lines: { show: true },
+                points: { show: true },
+            },
+            xaxis: { mode: "time", timeformat: '%H:%M', timezone:"browser"},
+            yaxis: { tickFormatter: plus_kb, },
+        };
 
-        $.plot($("#workers_plot"), [ {{ workers }} ] , options);
-        $.plot($("#miss_rate_plot"), [ {{ miss_rate }} ] , options);
-        $.plot($("#hit_rate_plot"), [ {{ hit_rate }} ] , options);
-        $.plot($("#num_items_plot"), [ {{ num_items }} ] , options);
-        $.plot($("#total_size_plot"), [ {{ total_size }} ] , options);
-        $.plot($("#num_requests_plot"), [ {{ num_requests }} ] , options);
+        $.plot($("#workers_plot"),[  {{ workers }} ], options);
+        $.plot($("#miss_rate_plot"),[  {{ miss_rate }}   ], percent_options);
+        $.plot($("#hit_rate_plot"), [  {{ hit_rate }}   ], percent_options);
+        $.plot($("#num_items_plot"), [  {{ num_items }}   ], options);
+        $.plot($("#total_size_plot"), [  {{ total_size }}   ], kb_options);
+        $.plot($("#num_requests_plot"), [  {{ num_requests }}   ], options);
 
     </script>
 
