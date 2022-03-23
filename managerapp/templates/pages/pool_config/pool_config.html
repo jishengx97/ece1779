@@ -12,8 +12,8 @@
         <li><a href="{{url_for('main')}}">Return to Main Page</a></li>
     </ul>
     {% if title == "AUTO CONFIG" %}
-      <form action="{{url_for('pool_config_form')}}" method="get">
-        <input type="submit" value="SWITCH TO MANUAL CONFIG" style="width:22%;">
+      <form action="{{url_for('pool_config_post')}}" method="post">
+        <input type="submit" name="action" value="SWITCH TO MANUAL CONFIG" style="width:22%;">
       </form>
       <ul>
         Currently, active instance: {{current_size}}<br>
@@ -29,8 +29,8 @@
           <input type="submit" name="action" value="submit">
       </form>
     {% else %}
-      <form action="{{url_for('pool_config_form')}}" method="get">
-        <input type="submit" value="SWITCH TO AUTO CONFIG" style="width:22%;">
+      <form action="{{url_for('pool_config_post')}}" method="post">
+        <input type="submit" name="action" value="SWITCH TO AUTO CONFIG" style="width:22%;">
       </form>
       <ul>
         Currently, active instance: {{current_size}}<br>
