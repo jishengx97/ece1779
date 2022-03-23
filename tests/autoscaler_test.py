@@ -26,7 +26,7 @@ def test():
     count = 0
     while True:
         for key in keys:
-            response = request.post("http://127.0.0.1:5000/api/key/"+key)
+            response = requests.post("http://127.0.0.1:5000/api/key/"+key)
             count += 1
             try:
                 response_data = response.json()
