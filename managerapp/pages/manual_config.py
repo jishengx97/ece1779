@@ -23,7 +23,7 @@ def manual_config():
 
 @webapp.route('/manual_config',methods=['POST'])
 def manual_config_post():
-
+   
     ### switch to manual mode
     config_mode['mode'] = 'Manual'
 
@@ -63,6 +63,13 @@ def manual_config_post():
         if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
             error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
             print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            
+            response = webapp.response_class(
+                        response=error_msg,
+                        status=200,
+                        mimetype='application/json'
+                    )
+            return response
             return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
 
 
@@ -74,6 +81,12 @@ def manual_config_post():
         except:
             error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
             print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            response = webapp.response_class(
+                        response=error_msg,
+                        status=200,
+                        mimetype='application/json'
+                    )
+            return response
             return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
 
         if r.status_code == 200:
@@ -81,6 +94,12 @@ def manual_config_post():
         else:
             error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
             print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            response = webapp.response_class(
+                        response=error_msg,
+                        status=200,
+                        mimetype='application/json'
+                    )
+            return response
             return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
 
 
@@ -92,6 +111,12 @@ def manual_config_post():
     if action == 'expand':
         if current_pool_size[0] >= 8:
             error_msg = 'Reach max pool size. Cannot expand more.'
+            response = webapp.response_class(
+                        response=error_msg,
+                        status=200,
+                        mimetype='application/json'
+                    )
+            return response
             return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
 
         # current_pool_size = current_pool_size + 1
@@ -136,6 +161,12 @@ def manual_config_post():
     elif action == 'shrink':
         if current_pool_size[0] == 1:
             error_msg = 'Reach min pool size. Cannot shrink more.'
+            response = webapp.response_class(
+                        response=error_msg,
+                        status=200,
+                        mimetype='application/json'
+                    )
+            return response
             return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
         
         # current_pool_size = current_pool_size - 1
@@ -149,8 +180,13 @@ def manual_config_post():
     else:
         error_msg = 'invalid input action'
 
-     
-    return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
+    response = webapp.response_class(
+                response=error_msg,
+                status=200,
+                mimetype='application/json'
+            )
+    return response
+    # return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
 
 
 def check_launch_and_notify(instance_id):
