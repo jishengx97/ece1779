@@ -111,8 +111,8 @@ def auto_config_post():
 @webapp.route('/auto_config/expand',methods=['POST'])
 def auto_config_expand():
     
-    # expand_ratio = float(request.form.get("ratio"))
-    expand_ratio = 2.0
+    expand_ratio = float(request.form.get("ratio"))
+#     expand_ratio = 2.0
     print("We have "+str(current_pool_size[0])+" instances currently.")
     pool_size_after_expand = current_pool_size[0] * expand_ratio
     pool_size_after_expand = int(round(pool_size_after_expand))
@@ -368,8 +368,8 @@ def auto_config_shrink():
         time.sleep(5)
 
     ################################
-    # shrink_ratio = float(request.form.get("ratio"))
-    shrink_ratio = 0.5
+    shrink_ratio = float(request.form.get("ratio"))
+#     shrink_ratio = 0.5
     print("We have "+str(current_pool_size[0])+" instances currently.")
     pool_size_after_shrink = current_pool_size[0] * shrink_ratio
 
