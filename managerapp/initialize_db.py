@@ -1,7 +1,8 @@
 from managerapp import webapp
 from common import models
+import requests
 
-def set_db_default_values():
+def set_db_default_values(memcache_ip):
     # This function initialzes the database and populates them 
     # with default values if necessary. Do all initialization here because
     # memcache app is being launched ealier
@@ -26,6 +27,12 @@ def set_db_default_values():
         result.replacement_policy = memcache_config_default_replacement_policy
         result.capacity_in_mb = memcache_config_default_capacity
         local_session.commit()
+
+    r = requests.post("http://" + memcache_ip + ":5000/refreshConfiguration")
+    if r.status_code == 200:
+        print( 'CONFIG SUCCESS FOR INSTANCE ' + memcache_ip)
+    else:
+        print("error!", r.json())
 
     # ensure that the MemcachePoolResizeConfig table has one and only one
     # entry
