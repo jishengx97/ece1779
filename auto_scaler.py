@@ -15,10 +15,12 @@ if __name__ == "__main__":
     local_session = db_session()
 
     while True:
+        local_session.flush()
         result = local_session.query(models.MemcachePoolResizeConfig).first()
         print(result)
         while result.resize_mode != "Automatic":
             time.sleep(1)
+            local_session.flush()
             result = local_session.query(models.MemcachePoolResizeConfig).first()
 
         # now the automatic scaling option is enabled
@@ -118,6 +120,7 @@ if __name__ == "__main__":
             print("WARNING! got more than one miss rate for the past minute, len =", len(miss_rate_values))
             continue
         
+        local_session.flush()
         result = local_session.query(models.MemcachePoolResizeConfig).first()
         if result.resize_mode != "Automatic":
             # surprise!
