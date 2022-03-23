@@ -328,6 +328,7 @@ def refreshConfiguration():
     global capacity
     global num_request
     global current_size
+    global num_item
     lock.acquire()
     try:
         num_request += 1
