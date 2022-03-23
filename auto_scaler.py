@@ -5,6 +5,9 @@ from decouple import config
 import boto3
 import requests
 import time
+from datetime import datetime,timedelta
+from pytz import timezone
+import pytz
 
 if __name__ == "__main__":
     database.init_db()
@@ -25,6 +28,8 @@ if __name__ == "__main__":
             aws_access_key_id=config('AWSAccessKeyId'), 
             aws_secret_access_key=config('AWSSecretKey')
         )
+        
+        eastern = timezone('US/Eastern')
         current_time = datetime.now(eastern)
         metric_namespace = 'ece1779-a2-memcache-stats'
         dimension_name = 'InstanceID'
