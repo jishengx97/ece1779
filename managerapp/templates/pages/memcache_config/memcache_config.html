@@ -3,7 +3,7 @@
 
     {% if error_msg != None %}
         <div class="error">
-            {{ error_msg }}
+            {% autoescape off %}{{error_msg}}{% endautoescape %}
         </div>
     {% endif %}
 
