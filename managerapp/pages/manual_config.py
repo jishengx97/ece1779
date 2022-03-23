@@ -226,7 +226,7 @@ def notify_and_terminate(instance_id):
    
     ## notify frontend  ##########
 
-    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps( '1' ) })
+    r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/terminated", data={'terminate_num':json.dumps(1) })
     if r.status_code == 200:
         print('Successfully notify frontend '+frontend_info['IP']+' to terminate the last '+ str(instance_id)+' instance.')
         client = boto3.client('ec2',
