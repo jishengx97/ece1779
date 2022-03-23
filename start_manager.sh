@@ -18,6 +18,7 @@ fi
 
 # Properly kill gunicorn processes that are still running
 kill -9 `ps aux | grep gunicorn | grep run_managerapp | awk '{print $2}'`
+kill -9 `ps aux | grep auto_scaler | awk '{print $2}'`
 
 echo "> Starting virtual environment and installing new packages"
 python3 -m venv venv

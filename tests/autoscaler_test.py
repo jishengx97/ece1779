@@ -12,6 +12,7 @@ def test():
     keys = ['s', 'a', 'e', 'b']
     for key in keys:
         value = {"key":key}
+        image_jpeg = open(IMAGE_DIR+'jpegtest.jpeg', 'rb')
         response = requests.post("http://127.0.0.1:5000/api/upload", data=value,files={"file":image_jpeg})
 
         try:

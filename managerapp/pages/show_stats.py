@@ -222,7 +222,8 @@ def show_stats():
     plot_total_size_result = []
     for x,y in zip(current_size_values, num_workers_timestamp):
         y = utc_to_local(y)
-        plot_total_size_result.append([y.timestamp()*1000, x])
+        # get size in kb
+        plot_total_size_result.append([y.timestamp()*1000, x/1024])
     plot_num_requests_result = []
     for x,y in zip(num_request_values, num_workers_timestamp):
         y = utc_to_local(y)

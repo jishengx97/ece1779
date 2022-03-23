@@ -78,12 +78,12 @@ def auto_config_post():
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
                             expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
 
-    config_mode['mode'] = 'Auto'
+    config_mode['mode'] = 'Automatic'
     local_session = webapp.db_session()
     result_count = local_session.query(models.MemcachePoolResizeConfig).count()
     if(result_count == 0):
         new_entry = models.MemcachePoolResizeConfig(
-            resize_mode = 'Auto',
+            resize_mode = 'Automatic',
             max_missrate_threshold = max_mr_input,
             min_missrate_threshold = min_mr_input,
             expand_ratio = expand_ratio_input,
@@ -95,7 +95,7 @@ def auto_config_post():
         assert False, "the MemcachePoolResizeConfig table should have only one entry!"
     else:
         result = local_session.query(models.MemcachePoolResizeConfig).first()
-        result.resize_mode = 'Auto',
+        result.resize_mode = 'Automatic',
         result.max_missrate_threshold = max_mr_input,
         result.min_missrate_threshold = min_mr_input,
         result.expand_ratio = expand_ratio_input,
