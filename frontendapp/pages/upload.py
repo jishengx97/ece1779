@@ -116,6 +116,16 @@ def test_upload():
                 mimetype='application/json'
             )
         return response
+    ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif'}
+    file_filename, file_extension = os.path.splitext(new_file.filename)
+    if (file_extension.lower() in ALLOWED_EXTENSIONS) == False:
+        data = {"success": "false","error": {"code" : "400", "message":"Only .jpg, .jpeg, .png and .gif formats are allowed!"}}
+        response = webapp.response_class(
+                response=json.dumps(data),
+                status=400,
+                mimetype='application/json'
+            )
+        return response
 
     lock_RDS.acquire()
     lock_S3.acquire()
