@@ -104,7 +104,7 @@ def memcache_config_save():
 
         r = requests.post("http://" + cache_ip + ":5000/refreshConfiguration")
         if r.status_code == 200:
-            error_msg += 'CONFIG SUCCESS FOR INSTANCE ' + instance['InstanceId']
+            error_msg += 'CONFIG SUCCESS FOR INSTANCE ' + instance['InstanceId'] + '<br />'
         else:
             error_msg += r.json()
 

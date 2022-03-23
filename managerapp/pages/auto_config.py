@@ -40,6 +40,12 @@ def auto_config_post():
 
     if is_float(max_mr_input) == False or is_float(min_mr_input) == False or is_float(expand_ratio_input) == False or is_float(shrink_ratio_input) == False:
         error_msg = "Please type in a valid float for all parameters!"
+        response = webapp.response_class(
+                    response=error_msg,
+                    status=200,
+                    mimetype='application/json'
+                )
+        return response
         return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = error_msg,
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
@@ -52,6 +58,12 @@ def auto_config_post():
 
     if max_mr_input < 0 or max_mr_input >100:
         error_msg = "Max miss rate threshold should be between 0 and 100."
+        response = webapp.response_class(
+                    response=error_msg,
+                    status=200,
+                    mimetype='application/json'
+                )
+        return response
         return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = error_msg,
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
@@ -59,6 +71,12 @@ def auto_config_post():
 
     if min_mr_input < 0 or min_mr_input >100:
         error_msg = "Min miss rate threshold should be between 0 and 100."
+        response = webapp.response_class(
+                    response=error_msg,
+                    status=200,
+                    mimetype='application/json'
+                )
+        return response
         return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = error_msg,
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
@@ -66,6 +84,12 @@ def auto_config_post():
     
     if expand_ratio_input < 1:
         error_msg = "Expand ratio should not be less than 1."
+        response = webapp.response_class(
+                    response=error_msg,
+                    status=200,
+                    mimetype='application/json'
+                )
+        return response
         return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = error_msg,
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
@@ -73,6 +97,12 @@ def auto_config_post():
 
     if shrink_ratio_input < 0 or shrink_ratio_input > 1:
         error_msg = "Shrink ratio should be between 0 and 1."
+        response = webapp.response_class(
+                    response=error_msg,
+                    status=200,
+                    mimetype='application/json'
+                )
+        return response
         return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = error_msg,
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
@@ -101,7 +131,13 @@ def auto_config_post():
         result.expand_ratio = expand_ratio_input,
         result.shrink_ratio = shrink_ratio_input,
         local_session.commit()
-
+    
+    response = webapp.response_class(
+                response='Successfully switched to automatic mode.',
+                status=200,
+                mimetype='application/json'
+            )
+    return response
     return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
                             current_size = current_pool_size[0], error_msg = 'Successfully switched to automatic mode.',
                             max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
