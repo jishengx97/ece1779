@@ -30,7 +30,7 @@ def key_save():
     ip_address = r_dict['ip_address']
 
     if ip_address == '':
-        error_msg = "No memcaches yet! From S3 KEY=" + key_input
+        error_msg = "No Memcaches yet! Please start the Manager app.Got image from S3 KEY=" + key_input
         lock_RDS.acquire()
         lock_S3.acquire()
         local_session = webapp.db_session()
