@@ -18,15 +18,6 @@ def print_cache_stats():
     global num_request
     global num_access
     global num_miss
-    # msg = ''
-    # msg += "Capacity: " + str(capacity) + " MB" + ".    "
-    # msg += "current_size: " + str(current_size) + " bytes"+ ".  "
-    # msg += "policy: " + policy + ".     "
-    # msg += "num_item: " + str(num_item) + ".    "
-    # msg += "num_request: " + str(num_request) + ".      "
-    # msg += "num_miss: " + str(num_miss) + ".    "
-    # msg += "num_access: " + str(num_access) + ".    "
-
     # Miss rate and hit rate in percentage
     if num_access > 0:
         miss_rate = num_miss / num_access * 100
@@ -34,13 +25,9 @@ def print_cache_stats():
     else:
         miss_rate = 0.0
         hit_rate = 0.0
-    # msg += "miss rate: " + str(miss_rate) + "%.    "
-    # msg += "hit rate: " + str(hit_rate) + "%.    "
 
     eastern = timezone('US/Eastern')
     current_time = datetime.now(eastern)
-    # msg += "curent time: " + current_time.strftime("%X") + ".    "
-    # print(msg)
 
     # print("Writing to CloudWatch Custom Metrics")
     cw_client = boto3.client('cloudwatch', 
@@ -154,7 +141,6 @@ def get():
     
     if key in memcache:
         memcache.move_to_end(key)
-        # value = memcache[key]
         value = base64.b64encode(memcache[key]).decode('utf-8')
         response = webapp.response_class(
             response=json.dumps(value),
@@ -178,8 +164,6 @@ def get():
 @webapp.route('/put',methods=['POST'])
 def put():
     global num_request
-    # global num_access
-    # global num_miss
     global num_item
     global current_size
 
@@ -267,7 +251,6 @@ def put():
 @webapp.route('/clear',methods=['POST'])
 def clear():
     # memcache[key] = value
-    # for key, value in memcache.items():
     global num_request
     global current_size
     global num_item
@@ -290,8 +273,6 @@ def clear():
 @webapp.route('/invalidateKey',methods=['POST'])
 def invalidateKey():
     global num_request
-    # global num_access
-    # global num_miss
     global num_item
     global current_size
 
@@ -377,7 +358,6 @@ def listall():
     contents = []
     for key in memcache.keys():
         contents.append([key, base64.b64encode(memcache[key]).decode('utf-8')])
-        # filee = json.dumps(memcache[key].decode("utf-8"))
     return render_template("image.html", memcache_contents = contents)
 
 @webapp.route('/size',methods=['POST'])

@@ -46,9 +46,6 @@ def manual_config_post():
         result.resize_mode = 'Manual'
         local_session.commit()
 
-    
-
-
     client = boto3.client('ec2',
         aws_access_key_id=config('AWSAccessKeyId'), 
         aws_secret_access_key=config('AWSSecretKey'))
@@ -70,8 +67,7 @@ def manual_config_post():
                         mimetype='application/json'
                     )
             return response
-            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-
+            
 
         cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
         print('cache IP is '+cache_ip)
@@ -87,8 +83,7 @@ def manual_config_post():
                         mimetype='application/json'
                     )
             return response
-            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-
+            
         if r.status_code == 200:
             print("Memcache of "+instance['InstanceId']+" is running.")
         else:
@@ -100,8 +95,7 @@ def manual_config_post():
                         mimetype='application/json'
                     )
             return response
-            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-
+            
 
     ################################
     
@@ -117,8 +111,7 @@ def manual_config_post():
                         mimetype='application/json'
                     )
             return response
-            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-
+            
         # current_pool_size = current_pool_size + 1
         current_pool_size[0] += 1
         response = client.run_instances(
@@ -167,8 +160,7 @@ def manual_config_post():
                         mimetype='application/json'
                     )
             return response
-            return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-        
+            
         # current_pool_size = current_pool_size - 1
         current_pool_size[0] -= 1
         terminate_id = instance_pool[-1]['InstanceId']
@@ -186,8 +178,7 @@ def manual_config_post():
                 mimetype='application/json'
             )
     return response
-    # return render_template("pages/manual_config/manual_config.html", title = 'Manually Config Cache Pool', current_size = current_pool_size[0], error_msg = error_msg)
-
+    
 
 def check_launch_and_notify(instance_id):
     print("subprocess starts")

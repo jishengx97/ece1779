@@ -46,10 +46,6 @@ def auto_config_post():
                     mimetype='application/json'
                 )
         return response
-        return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = error_msg,
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
     
     max_mr_input = float(max_mr_input)
     min_mr_input = float(min_mr_input)
@@ -64,10 +60,6 @@ def auto_config_post():
                     mimetype='application/json'
                 )
         return response
-        return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = error_msg,
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
 
     if min_mr_input < 0 or min_mr_input >100:
         error_msg = "Min miss rate threshold should be between 0 and 100."
@@ -77,10 +69,6 @@ def auto_config_post():
                     mimetype='application/json'
                 )
         return response
-        return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = error_msg,
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
     
     if expand_ratio_input < 1:
         error_msg = "Expand ratio should not be less than 1."
@@ -90,10 +78,6 @@ def auto_config_post():
                     mimetype='application/json'
                 )
         return response
-        return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = error_msg,
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
 
     if shrink_ratio_input < 0 or shrink_ratio_input > 1:
         error_msg = "Shrink ratio should be between 0 and 1."
@@ -103,10 +87,6 @@ def auto_config_post():
                     mimetype='application/json'
                 )
         return response
-        return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = error_msg,
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
 
     config_mode['mode'] = 'Automatic'
     local_session = webapp.db_session()
@@ -138,10 +118,6 @@ def auto_config_post():
                 mimetype='application/json'
             )
     return response
-    return render_template("pages/auto_config/auto_config.html", title = 'Auto Config Cache Pool', 
-                            current_size = current_pool_size[0], error_msg = 'Successfully switched to automatic mode.',
-                            max_mr_th = max_mr_input, min_mr_th=min_mr_input, 
-                            expand_ratio=expand_ratio_input, shrink_ratio=shrink_ratio_input)
     
 
 @webapp.route('/auto_config/expand',methods=['POST'])
@@ -205,10 +181,6 @@ def auto_config_expand():
     print(instance_pool)
     current_pool_size[0] = current_pool_size[0] + len(new_instance)
     print("after expand, current_pool_size", current_pool_size[0])
-
-
-    # p = Process(target=subprocess_manager, args= (new_instance, ))
-    # p.start()
 
     proc = []
 
@@ -367,12 +339,6 @@ def auto_config_shrink():
                 print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
                 all_ready = False
                 break
-                # response = webapp.response_class(
-                #         response=json.dumps('OK'),
-                #         status=200,
-                #         mimetype='application/json'
-                #     )
-                # return response
 
             cache_ip = response['Reservations'][0]['Instances'][0]['PublicIpAddress']
             print('cache IP is '+cache_ip)
@@ -383,24 +349,12 @@ def auto_config_shrink():
                 print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
                 all_ready = False
                 break
-                # response = webapp.response_class(
-                #         response=json.dumps('OK'),
-                #         status=200,
-                #         mimetype='application/json'
-                #     )
-                # return response
             if r.status_code == 200:
                 print("Memcache of "+instance['InstanceId']+" is running.")
             else:
                 print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
                 all_ready = False
                 break
-                # response = webapp.response_class(
-                #         response=json.dumps('OK'),
-                #         status=200,
-                #         mimetype='application/json'
-                #     )
-                # return response
         time.sleep(5)
 
     ################################
