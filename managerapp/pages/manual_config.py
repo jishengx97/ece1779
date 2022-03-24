@@ -61,8 +61,8 @@ def manual_config_post():
             ]
         )
         if response['Reservations'][0]['Instances'][0]['State']['Name'] != 'running':
-            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete.")
             
             response = webapp.response_class(
                         response=error_msg,
@@ -79,8 +79,8 @@ def manual_config_post():
         try:
             r = requests.post("http://" + cache_ip + ":5000/is_running")
         except:
-            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete.")
             response = webapp.response_class(
                         response=error_msg,
                         status=200,
@@ -92,8 +92,8 @@ def manual_config_post():
         if r.status_code == 200:
             print("Memcache of "+instance['InstanceId']+" is running.")
         else:
-            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete."
-            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please expand or shrink until initializing complete.")
+            error_msg = "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete."
+            print( "Memcache of "+instance['InstanceId']+" is still initializing. Please don't expand or shrink until initializing complete.")
             response = webapp.response_class(
                         response=error_msg,
                         status=200,
