@@ -8,6 +8,7 @@ import boto3
 import requests
 from flask import json
 import sys
+import paramiko
 # manager = multiprocessing.Manager()
 # instance_pool = manager.list()
 instance_pool = []
@@ -40,6 +41,16 @@ for reservation in response['Reservations']:
         memcache_info['DNS'] = reservation['Instances'][0]['PublicDnsName']
         memcache_info['IP'] = reservation['Instances'][0]['PublicIpAddress']
 instance_pool.append({'InstanceId':config('MEMCACHE_ID')})
+
+#####run first memcache########
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect(memcache_info['IP'], username='ubuntu', key_filename=config('PEM_PATH'))
+stdin, stdout, stderr = client.exec_command('cd ece1779; chmod 700 start_memcache.sh; ./start_memcache.sh')
+print(stdout.readlines())
+print(stderr.readlines())
+client.close()
+###############################
 
 ######notify frontend the first memcache
 r = requests.post("http://" + frontend_info['IP'] + ":5000/memcaches/launched", data={'list_string':json.dumps([ memcache_info['IP'] ] ) })
