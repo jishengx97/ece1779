@@ -70,8 +70,48 @@ def main():
             },
         )
     
-    for i in range(num_x_blocks * num_y_blocks):
-        print("region id", i, "has", list_region[i], "nodes")
+    for node_id in G.nodes:
+        x = G.nodes[node_id]["x"]
+        y = G.nodes[node_id]["y"]
+
+        response = dynamo_client.put_item(
+            TableName='table_node',
+            Item={
+                "node_id": {"N": str(node_id)},
+                "x": {"N": str(x)},
+                "y": {"N": str(y)},
+            },
+        )
+
+    for edge_id in G.edges:
+        print(G.edges[edge_id])
+        length = G.edges[edge_id]['length']
+        print(length)
+        speed_kph = G.edges[edge_id]['speed_kph']
+        print(speed_kph)
+        edge_tuple = '(' + str(edge_id[0])+', '+str(edge_id[1])+', '+str(edge_id[2])+')'
+        print(edge_tuple)
+        geometry = []
+        if "geometry" in G.edges[edge_id]:
+            print(list(G.edges[edge_id]['geometry'].coords)) 
+            for item in list(G.edges[edge_id]['geometry'].coords):
+                d = {}
+                d["S"] = '(' + str(item[0])+', '+str(item[1])+')'
+                geometry.append(d)
+        print(geometry)
+        response = dynamo_client.put_item(
+            TableName='table_edges',
+            Item={
+                "src_node_id": {"N": str(edge_id[0])},
+                "edge_tuple": {"S": edge_tuple },
+                "length": {"N": str(G.edges[edge_id]['length'])},
+                "speed_kph": {"N": str(G.edges[edge_id]['speed_kph'])},
+                "geometry": {"L": geometry},
+            },
+        )
+    
+    # for i in range(num_x_blocks * num_y_blocks):
+    #     print("region id", i, "has", list_region[i], "nodes")
 
 
 if __name__ == "__main__":
