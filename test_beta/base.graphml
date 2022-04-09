@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key attr.name="junction" attr.type="string" for="edge" id="d23" />
+  <key attr.name="tunnel" attr.type="string" for="edge" id="d22" />
+  <key attr.name="access" attr.type="string" for="edge" id="d21" />
+  <key attr.name="bridge" attr.type="string" for="edge" id="d20" />
+  <key attr.name="maxspeed" attr.type="string" for="edge" id="d19" />
+  <key attr.name="name" attr.type="string" for="edge" id="d18" />
+  <key attr.name="ref" attr.type="string" for="edge" id="d17" />
+  <key attr.name="speed_kph" attr.type="string" for="edge" id="d16" />
+  <key attr.name="geometry" attr.type="string" for="edge" id="d15" />
+  <key attr.name="length" attr.type="string" for="edge" id="d14" />
+  <key attr.name="highway" attr.type="string" for="edge" id="d13" />
+  <key attr.name="lanes" attr.type="string" for="edge" id="d12" />
+  <key attr.name="oneway" attr.type="string" for="edge" id="d11" />
+  <key attr.name="osmid" attr.type="string" for="edge" id="d10" />
+  <key attr.name="elevation" attr.type="string" for="node" id="d9" />
+  <key attr.name="street_count" attr.type="string" for="node" id="d8" />
+  <key attr.name="highway" attr.type="string" for="node" id="d7" />
+  <key attr.name="ref" attr.type="string" for="node" id="d6" />
+  <key attr.name="x" attr.type="string" for="node" id="d5" />
+  <key attr.name="y" attr.type="string" for="node" id="d4" />
+  <key attr.name="simplified" attr.type="string" for="graph" id="d3" />
+  <key attr.name="crs" attr.type="string" for="graph" id="d2" />
+  <key attr.name="created_with" attr.type="string" for="graph" id="d1" />
+  <key attr.name="created_date" attr.type="string" for="graph" id="d0" />
+  <graph edgedefault="directed">
+    <node id="0">
+      <data key="d4">43.809974</data>
+      <data key="d5">-79.2783821</data>
+    </node>
+    <node id="1">
+      <data key="d4">43.7250892</data>
+      <data key="d5">-79.3961167</data>
+    </node>
+    <node id="2">
+      <data key="d4">43.809974</data>
+      <data key="d5">-79.3961167</data>
+    </node>
+    <node id="3">
+      <data key="d4">43.7250892</data>
+      <data key="d5">-79.2783821</data>
+    </node>
+    <edge id="0" source="2" target="0">
+    </edge>
+    <edge id="0" source="0" target="3">
+    </edge>
+    <edge id="0" source="3" target="1">
+    </edge>
+    <edge id="0" source="1" target="2">
+    </edge>
+    <data key="d0">2021-11-22 23:58:07</data>
+    <data key="d1">OSMnx 1.1.1</data>
+    <data key="d2">epsg:4326</data>
+    <data key="d3">True</data>
+  </graph>
+</graphml>
