@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if error_msg != None %}
+        <div class="error">
+            {{ error_msg }}
+        </div>
+    {% endif %}
+
+    <form action="{{url_for('key_save')}}" method="post">
+        Departure Longitude<input type="string" name="source_x">
+        Departure Latitude<input type="string" name="source_y"><br/><br/>
+        Destination Longitude<input type="string" name="target_x">
+        Destination Latitude<input type="string" name="target_y"><br/><br/>
+        <input type="submit">
+        <input type="reset">
+    </form>
+    {% if img_file != None %}
+        <img src="{{ url_for('send_img', filename = img_file) }}" alt="User Image"><br/>
+    {% endif %}
+{% endblock %}
