@@ -106,6 +106,7 @@ def main():
                 "edge_tuple": {"S": edge_tuple },
                 "length": {"N": str(G.edges[edge_id]['length'])},
                 "speed_kph": {"N": str(G.edges[edge_id]['speed_kph'])},
+                "current_speed": {"N": str(G.edges[edge_id]['speed_kph'])},
                 "geometry": {"L": geometry},
             },
         )
