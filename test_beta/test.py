@@ -4,10 +4,13 @@ import boto3
 from decouple import config
 from boto3.dynamodb.conditions import Key
 import queue
+import shapely
+import PIL
 
 target_x = -79.3479061
 target_y = 43.7792657
-
+# target_x = -79.2990569
+# target_y = 43.7560562
 source_x = -79.2859861
 source_y = 43.7472545
 
@@ -60,7 +63,6 @@ for item in response['Items']:
     G.add_node(int(item['node_id']['N']), x=float(item['x']['N']) ,y=float(item['y']['N']))
 
 source_id = osmnx.distance.nearest_nodes(G,source_x,source_y,return_dist=False)
-print(source_id)
 
 G = osmnx.load_graphml('./base.graphml')
 
@@ -85,7 +87,6 @@ for item in response['Items']:
     G.add_node(int(item['node_id']['N']), x=float(item['x']['N']) ,y=float(item['y']['N']))
 
 target_id = osmnx.distance.nearest_nodes(G,target_x,target_y,return_dist=False)
-print(target_id)
 
 edge_table = {}
 path = []
@@ -134,4 +135,42 @@ while(not rank.empty()):
                     temppath = toppath[1].copy()
                     temppath.append(item_tuple)
                     rank.put((toppath[0]+float(item['length']['N'])/float(item['speed_kph']['N']),temppath)) 
-print(path)
+
+pathset = set(path)
+for path in pathset:
+    dote.append(path[0])
+    dote.append(path[1])
+doteset = set(dote)
+for dote in doteset:
+    response = dynamo_client.get_item(
+        TableName='table_node',
+        Key={
+            "node_id": {"N": str(dote)},
+        },
+    )
+    G.add_node(dote, x=float(response['Item']['x']['N']) ,y=float(response['Item']['y']['N']))
+
+for path in pathset:
+    dictionary_list = edge_table[path]['geometry']['L']
+    if len(dictionary_list) > 0:
+        geometry_tup_list = []
+        for dictionary in dictionary_list:
+            geometry_tup_list.append(eval(dictionary['S']))
+        geometry_linstr = shapely.geometry.linestring.LineString(geometry_tup_list)
+        G.add_edge(path[0],path[1],geometry = geometry_linstr)
+    else:
+        G.add_edge(path[0],path[1])
+ns = [0 for i_d in G.nodes]
+na = [0 for i_d in G.nodes]
+nc = ['#7D7D7D' for i_d in G.nodes]
+el = [4 for u, v, d in G.edges]
+ea = [1 for u, v, d in G.edges]
+ec = ['#78DAFF' for u, v, d in G.edges]
+fig, ax = osmnx.plot_graph(G,figsize=(10,10),bgcolor='w',node_size=ns,node_alpha=na,node_color=nc,edge_linewidth=el,edge_alpha=ea,edge_color=ec,show=False,close=True,filepath=None)
+fig.savefig('_testtt.png')
+back = PIL.Image.open('_back.png')
+testtt = PIL.Image.open('_testtt.png')
+back = back.convert("RGBA")
+testtt = testtt.convert("RGBA")
+blended = PIL.Image.blend(back, testtt, alpha=0.3)
+blended.save("blended.png")
