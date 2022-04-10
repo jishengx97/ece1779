@@ -226,9 +226,9 @@ def key_save():
             G.add_edge(path[0],path[1],geometry = geometry_linstr)
         else:
             G.add_edge(path[0],path[1])
-    ns = [0 for i_d in G.nodes]
-    na = [0 for i_d in G.nodes]
-    nc = ['#7D7D7D' for i_d in G.nodes]
+    ns = [50 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
+    na = [1 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
+    nc = ['#FF7874' if i_d == target_id else '#78DAFF' for i_d in G.nodes]
     el = [4 for u, v, d in G.edges]
     ea = [1 for u, v, d in G.edges]
     ec = ['#78DAFF' for u, v, d in G.edges]
