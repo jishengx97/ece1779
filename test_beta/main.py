@@ -23,7 +23,7 @@ title = "Map"
 
 @webapp.route('/',methods=['GET'])
 def main():
-    return render_template("main.html",title = title, error_msg = None,img_file = None)
+    return render_template("main.html",title = title, error_msg = None,img_file = "_back.png")
 
 
 @webapp.route('/',methods=['POST'])
@@ -36,54 +36,54 @@ def key_save():
     target_y = request.form.get("target_y")
     if source_x == "":
         error_msg = "Missing Departure Longitude"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     try:
         source_x = float(source_x)
     except ValueError:
         error_msg = "Departure Longitude is not a float"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     if not -79.3941167 <= source_x <= -79.2820821:
         error_msg = "Departure Longitude out of range Now we only support -79.3941167 <= Longitude <= -79.2820821"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
 
     if source_y == "":
         error_msg = "Missing Departure Latitude"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     try:
         source_y = float(source_y)
     except ValueError:
         error_msg = "Departure Latitude is not a float"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)   
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")   
     if not 43.7270892 <= source_y <= 43.807974:
         error_msg = "Departure Latitude out of range Now we only support 43.7270892 <= Latitude <= 43.807974"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
 
     if target_x == "":
         error_msg = "Missing Destination Longitude"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     try:
         target_x = float(target_x)
     except ValueError:
         error_msg = "Destination Longitude is not a float"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None) 
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png") 
     if not -79.3941167 <= target_x <= -79.2820821:
         error_msg = "Destination Longitude out of range Now we only support -79.3941167 <= Longitude <= -79.2820821"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
 
     if target_y == "":
         error_msg = "Missing Destination Latitude"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     try:
         target_y = float(target_y)
     except ValueError:
         error_msg = "Destination Latitude is not a float"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
     if not 43.7270892 <= target_y <= 43.807974:
         error_msg = "Destination Latitude out of range Now we only support 43.7270892 <= Latitude <= 43.807974"
-        return render_template("main.html",title = title,error_msg = error_msg,img_file = None)
+        return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
     BLOCK_SIZE = 0.01
     G = osmnx.load_graphml('./test_beta/base.graphml')
@@ -174,7 +174,7 @@ def key_save():
     for item in response['Items']:
         item_tuple = eval(item['edge_tuple']['S'])
         edge_table[item_tuple] = item
-        rank.put((float(item['length']['N'])/float(item['speed_kph']['N']),[item_tuple]))
+        rank.put((float(item['length']['N'])/float(item['current_speed']['N']),[item_tuple]))
 
     while(not rank.empty()):
         toppath = rank.get()
@@ -200,7 +200,7 @@ def key_save():
                         edge_table[item_tuple] = item
                         temppath = toppath[1].copy()
                         temppath.append(item_tuple)
-                        rank.put((toppath[0]+float(item['length']['N'])/float(item['speed_kph']['N']),temppath)) 
+                        rank.put((toppath[0]+float(item['length']['N'])/float(item['current_speed']['N']),temppath)) 
 
     pathset = set(path)
     for path in pathset:
