@@ -1,5 +1,7 @@
+from flask import Flask
+webapp = Flask(__name__)
 from flask import render_template, url_for, request, send_from_directory
-from test_beta import webapp
+# from test_beta import webapp
 from flask import json
 import osmnx
 import math
