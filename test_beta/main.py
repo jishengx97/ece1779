@@ -12,6 +12,8 @@ import queue
 import shapely
 import PIL
 import os
+import requests
+import json
 ## target_x = -79.3479061
 ## target_y = 43.7792657
 # target_x = -79.2990569
@@ -228,6 +230,41 @@ def key_save():
             G.add_edge(path[0],path[1],geometry = geometry_linstr)
         else:
             G.add_edge(path[0],path[1])
+            
+        response = dynamo_client.get_item(
+            TableName='table_edges',
+            Key={
+                "src_node_id": {"N": str(path[0])},
+                "edge_tuple": {"S":'(' + str(path[0])+', '+str(path[1])+', '+str(path[2])+')' },
+            },
+            ConsistentRead = True,
+        )
+        if float(response['Item']['current_speed']['N']) > 5:
+            newspeed = float(response['Item']['current_speed']['N']) - 5
+            responseput = dynamo_client.put_item(
+                TableName='table_edges',
+                Item={
+                    "src_node_id": {"N": str(path[0])},
+                    "edge_tuple": {"S":'(' + str(path[0])+', '+str(path[1])+', '+str(path[2])+')' },
+                    "length": {"N": response['Item']['length']['N']},
+                    "speed_kph": {"N": response['Item']['speed_kph']['N']},
+                    "current_speed": {"N": str(newspeed)},
+                    "geometry": {"L": response['Item']['geometry']['L']},
+                },
+            )
+    
+    pathes = []
+    for path in pathset:
+        pathes.append(path[0])
+        pathes.append(path[1])
+        pathes.append(path[2])
+    data = {
+        "input": "{  \"path\":  "+ json.dumps(pathes) +" }",
+        "stateMachineArn": "arn:aws:states:us-east-1:968434901467:stateMachine:MyStateMachine",
+    }
+
+    response = requests.post("https://nadcdu8gn4.execute-api.us-east-1.amazonaws.com/prod/execution", data=json.dumps(data))
+
     ns = [50 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
     na = [1 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
     nc = ['#FF7874' if i_d == target_id else '#78DAFF' for i_d in G.nodes]
