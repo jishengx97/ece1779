@@ -88,7 +88,7 @@ def key_save():
         return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
     BLOCK_SIZE = 0.01
-    G = osmnx.load_graphml('./test_beta/base.graphml')
+    G = osmnx.load_graphml('./base.graphml')
     dynamo_client = boto3.client('dynamodb', 
         aws_access_key_id=config('AWSAccessKeyId'), 
         aws_secret_access_key=config('AWSSecretKey')
@@ -130,7 +130,7 @@ def key_save():
 
     source_id = osmnx.distance.nearest_nodes(G,source_x,source_y,return_dist=False)
 
-    G = osmnx.load_graphml('./test_beta/base.graphml')
+    G = osmnx.load_graphml('./base.graphml')
 
     x = target_x
     y = target_y
@@ -154,7 +154,7 @@ def key_save():
 
     target_id = osmnx.distance.nearest_nodes(G,target_x,target_y,return_dist=False)
 
-    G = osmnx.load_graphml('./test_beta/base.graphml')
+    G = osmnx.load_graphml('./base.graphml')
 
     edge_table = {}
     path = []
@@ -235,19 +235,19 @@ def key_save():
     ea = [1 for u, v, d in G.edges]
     ec = ['#78DAFF' for u, v, d in G.edges]
     fig, ax = osmnx.plot_graph(G,figsize=(10,10),bgcolor='w',node_size=ns,node_alpha=na,node_color=nc,edge_linewidth=el,edge_alpha=ea,edge_color=ec,show=False,close=True,filepath=None)
-    if os.path.exists('./test_beta/_path.png'):
-        os.remove('./test_beta/_path.png')
-    fig.savefig('./test_beta/_path.png')
-    back = PIL.Image.open('./test_beta/_back.png')
-    testtt = PIL.Image.open('./test_beta/_path.png')
+    if os.path.exists('./_path.png'):
+        os.remove('./_path.png')
+    fig.savefig('./_path.png')
+    back = PIL.Image.open('./_back.png')
+    testtt = PIL.Image.open('./_path.png')
     back = back.convert("RGBA")
     testtt = testtt.convert("RGBA")
     blended = PIL.Image.blend(back, testtt, alpha=0.3)
-    if os.path.exists('./test_beta/_blended.png'):
-        os.remove('./test_beta/_blended.png')
-    blended.save('./test_beta/_blended.png')
+    if os.path.exists('./_blended.png'):
+        os.remove('./_blended.png')
+    blended.save('./_blended.png')
     return render_template("main.html",title = title,error_msg = error_msg,img_file = '_blended.png')
 
 @webapp.route('/<filename>')
 def send_img(filename):
-    return send_from_directory(os.getcwd()+"/test_beta/",filename)
+    return send_from_directory(os.getcwd()+"/",filename)
