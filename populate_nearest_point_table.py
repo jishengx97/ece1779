@@ -49,6 +49,16 @@ def main():
     for _ in range(num_x_blocks * num_y_blocks):
         list_region.append(0)
 
+    xval_dict = {}
+    yval_dict = {}
+    region_id_dict = {}
+    adj = {}
+    for edge in G.edges:
+        if edge[0] in adj:
+            adj[edge[0]].append(edge)
+        else:
+            adj[edge[0]] = []
+            adj[edge[0]].append(edge)
     for node_id in G.nodes:
         x = G.nodes[node_id]["x"]
         y = G.nodes[node_id]["y"]
@@ -60,6 +70,53 @@ def main():
         print(G.nodes[node_id]["x"], G.nodes[node_id]["y"], region_id)
 
         list_region[region_id] += 1
+        region_id_dict[node_id] = region_id
+
+    for node_id in G.nodes:
+        x = G.nodes[node_id]["x"]
+        y = G.nodes[node_id]["y"]
+        x_val = math.floor((x - lowest_cap_x) / BLOCK_SIZE)
+        y_val = math.floor((y - lowest_cap_y) / BLOCK_SIZE)
+
+        region_id = x_val + y_val * num_x_blocks
+        assert region_id_dict[node_id] == region_id
+        adj_list = []
+        adj_edge_id = []
+        adj_region = []
+        adj_length = []
+        adj_limit = []
+        adj_speed = []
+        if node_id in adj:
+            for adj_nodes in adj[node_id]:
+                d = {}
+                d["N"] = str(adj_nodes[1])
+                adj_list.append(d)
+
+                d = {}
+                d["N"] = str(adj_nodes[2])
+                adj_edge_id.append(d)
+
+                d = {}
+                d["N"] = str(region_id_dict[adj_nodes[1]])
+                adj_region.append(d)
+
+                d = {}
+                d["N"] = str(G.edges[adj_nodes]["length"])
+                adj_length.append(d)
+
+                d = {}
+                d["N"] = str(G.edges[adj_nodes]["speed_kph"])
+                adj_limit.append(d)
+
+                d = {}
+                d["N"] = str(G.edges[adj_nodes]["speed_kph"])
+                adj_speed.append(d)
+            print(adj_list)
+            print(adj_region)
+            print(adj_length)
+            print(adj_limit)
+            print(adj_speed)
+
         response = dynamo_client.put_item(
             TableName='table_find_nearest_point',
             Item={
@@ -67,6 +124,12 @@ def main():
                 "node_id": {"N": str(node_id)},
                 "x": {"N": str(x)},
                 "y": {"N": str(y)},
+                "adj_list": {"L": adj_list},
+                "adj_edge_id": {"L": adj_edge_id},
+                "adj_region": {"L": adj_region},
+                "adj_length": {"L": adj_length},
+                "adj_speed_limit": {"L": adj_list},
+                "adj_current_speed": {"L": adj_speed},
             },
         )
     

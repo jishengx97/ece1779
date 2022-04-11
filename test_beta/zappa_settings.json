@@ -4,11 +4,11 @@
     "profile_name": "default",
     "project_name": "test-beta",
     "runtime": "python3.8",
-    "s3_bucket": "zappa-proj3",
+    "s3_bucket": "zappa-proj3-ji",
     "aws_region": "us-east-1",
     "slim_handler": true,
     "layers": ["arn:aws:lambda:us-east-1:668099181075:layer:AWSLambda-Python38-SciPy1x:107"],
     "timeout_seconds": 300,
-    "memory_size": 1024
+    "memory_size": 3072
     }
 }

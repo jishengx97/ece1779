@@ -24,6 +24,26 @@ import json
 
 
 title = "Map"
+BLOCK_SIZE = 0.01
+
+def get_region_id(x,y):
+    min_x = -79.3941167
+    max_x = -79.2820821
+    min_y = 43.7270892
+    max_y = 43.807974
+
+    lowest_cap_x = -79.4
+    highest_cap_x = -79.28
+    lowest_cap_y = 43.72
+    highest_cap_y = 43.81
+    
+    num_x_blocks = round((highest_cap_x - lowest_cap_x)/BLOCK_SIZE)
+    num_y_blocks = round((highest_cap_y - lowest_cap_y)/BLOCK_SIZE)
+
+    x_val = math.floor((x - lowest_cap_x) / BLOCK_SIZE)
+    y_val = math.floor((y - lowest_cap_y) / BLOCK_SIZE)
+    region_id = x_val + y_val * num_x_blocks  
+    return region_id
 
 @webapp.route('/',methods=['GET'])
 def main():
@@ -89,34 +109,13 @@ def key_save():
         error_msg = "Destination Latitude out of range Now we only support 43.7270892 <= Latitude <= 43.807974"
         return render_template("main.html",title = title,error_msg = error_msg,img_file = "_back.png")
 
-    BLOCK_SIZE = 0.01
+
     G = osmnx.load_graphml('./base.graphml')
-    dynamo_client = boto3.client('dynamodb', 
-        aws_access_key_id=config('AWSAccessKeyId'), 
-        aws_secret_access_key=config('AWSSecretKey')
-    )
+    dynamo_client = boto3.client('dynamodb')
+    visited_region = set()
+    my_local_graph = {}
 
-    min_x = -79.3941167
-    max_x = -79.2820821
-    min_y = 43.7270892
-    max_y = 43.807974
-
-    lowest_cap_x = -79.4
-    highest_cap_x = -79.28
-    lowest_cap_y = 43.72
-    highest_cap_y = 43.81
-
-    # set 0.01*0.01 blocks
-    num_x_blocks = 12
-    num_y_blocks = 9
-
-
-    x = source_x
-    y = source_y
-    x_val = math.floor((x - lowest_cap_x) / BLOCK_SIZE)
-    y_val = math.floor((y - lowest_cap_y) / BLOCK_SIZE)
-
-    region_id = x_val + y_val * num_x_blocks  
+    region_id = get_region_id(source_x, source_y)
     response = dynamo_client.query(
         TableName='table_find_nearest_point',
         ExpressionAttributeValues={
@@ -127,20 +126,18 @@ def key_save():
         KeyConditionExpression = "region_id = :v1",
     )
 
+    visited_region.add(region_id)
+
     for item in response['Items']:
-        G.add_node(int(item['node_id']['N']), x=float(item['x']['N']) ,y=float(item['y']['N']))
+        node_id = int(item['node_id']['N'])
+        
+        my_local_graph[node_id] = item
+        if node_id not in G.nodes:
+            G.add_node(node_id, x=float(item['x']['N']) ,y=float(item['y']['N']))
 
     source_id = osmnx.distance.nearest_nodes(G,source_x,source_y,return_dist=False)
 
-    G = osmnx.load_graphml('./base.graphml')
-
-    x = target_x
-    y = target_y
-    x_val = math.floor((x - lowest_cap_x) / BLOCK_SIZE)
-    y_val = math.floor((y - lowest_cap_y) / BLOCK_SIZE)
-
-    region_id = x_val + y_val * num_x_blocks
-
+    region_id = get_region_id(target_x, target_y)
     response = dynamo_client.query(
         TableName='table_find_nearest_point',
         ExpressionAttributeValues={
@@ -150,13 +147,16 @@ def key_save():
         },
         KeyConditionExpression = "region_id = :v1",
     )
+    visited_region.add(region_id)
 
     for item in response['Items']:
-        G.add_node(int(item['node_id']['N']), x=float(item['x']['N']) ,y=float(item['y']['N']))
+        node_id = int(item['node_id']['N'])
+        
+        my_local_graph[node_id] = item
+        if node_id not in G.nodes:
+            G.add_node(node_id, x=float(item['x']['N']) ,y=float(item['y']['N']))
 
     target_id = osmnx.distance.nearest_nodes(G,target_x,target_y,return_dist=False)
-
-    G = osmnx.load_graphml('./base.graphml')
 
     edge_table = {}
     path = []
@@ -164,21 +164,35 @@ def key_save():
     rank = queue.PriorityQueue()
     visited_node = set()
 
-    response = dynamo_client.query(
-        TableName='table_edges',
-        ExpressionAttributeValues={
-            ':v1': {
-                'N': str(source_id),
-            },
-        },
-        KeyConditionExpression = "src_node_id = :v1",
-    )
 
     visited_node.add(source_id)
-    for item in response['Items']:
-        item_tuple = eval(item['edge_tuple']['S'])
-        edge_table[item_tuple] = item
-        rank.put((float(item['length']['N'])/float(item['current_speed']['N']),[item_tuple]))
+    assert source_id in my_local_graph
+
+    for i in range(len(my_local_graph[source_id]["adj_region"]["L"])):
+        adj_region_id = int(my_local_graph[source_id]["adj_region"]["L"][i]["N"])
+        if not adj_region_id in visited_region:
+            response = dynamo_client.query(
+                TableName='table_find_nearest_point',
+                ExpressionAttributeValues={
+                    ':v1': {
+                        'N': str(adj_region_id),
+                    },
+                },
+                KeyConditionExpression = "region_id = :v1",
+            )
+            visited_region.add(adj_region_id)
+
+            for item in response['Items']:
+                node_id = int(item['node_id']['N'])
+
+                my_local_graph[node_id] = item
+                if node_id not in G.nodes:
+                    G.add_node(node_id, x=float(item['x']['N']) ,y=float(item['y']['N']))
+        
+        length = my_local_graph[source_id]["adj_length"]["L"][i]["N"]
+        speed = my_local_graph[source_id]["adj_current_speed"]["L"][i]["N"]
+        item_tuple = (source_id, int(my_local_graph[source_id]["adj_list"]["L"][i]["N"]), int(my_local_graph[source_id]["adj_edge_id"]["L"][i]["N"]))
+        rank.put((float(length)/float(speed),[item_tuple]))
 
     while(not rank.empty()):
         toppath = rank.get()
@@ -187,41 +201,50 @@ def key_save():
             visited_node.add(toppath[1][-1][1])
             rank = queue.PriorityQueue()
         else:
-            if(not toppath[1][-1][1] in visited_node):
-                visited_node.add(toppath[1][-1][1])
-                response = dynamo_client.query(
-                    TableName='table_edges',
-                    ExpressionAttributeValues={
-                        ':v1': {
-                            'N': str(toppath[1][-1][1]),
-                        },
-                    },
-                    KeyConditionExpression = "src_node_id = :v1",
-                )
-                if response['Count']!=0:
-                    for item in response['Items']:
-                        item_tuple = eval(item['edge_tuple']['S'])
-                        edge_table[item_tuple] = item
-                        temppath = toppath[1].copy()
-                        temppath.append(item_tuple)
-                        rank.put((toppath[0]+float(item['length']['N'])/float(item['current_speed']['N']),temppath)) 
+            next_node_id = toppath[1][-1][1]
+            if(not next_node_id in visited_node):
+                visited_node.add(next_node_id)
+                assert next_node_id in my_local_graph
+                for i in range(len(my_local_graph[next_node_id]["adj_region"]["L"])):
+                    adj_region_id = int(my_local_graph[next_node_id]["adj_region"]["L"][i]["N"])
+                    if not adj_region_id in visited_region:
+                        response = dynamo_client.query(
+                            TableName='table_find_nearest_point',
+                            ExpressionAttributeValues={
+                                ':v1': {
+                                    'N': str(adj_region_id),
+                                },
+                            },
+                            KeyConditionExpression = "region_id = :v1",
+                        )
+                        visited_region.add(adj_region_id)
 
+                        for item in response['Items']:
+                            node_id = int(item['node_id']['N'])
+                            my_local_graph[node_id] = item
+                            if node_id not in G.nodes:
+                                G.add_node(node_id, x=float(item['x']['N']) ,y=float(item['y']['N']))
+                    
+                    length = my_local_graph[next_node_id]["adj_length"]["L"][i]["N"]
+                    speed = my_local_graph[next_node_id]["adj_current_speed"]["L"][i]["N"]
+                    item_tuple = (next_node_id, int(my_local_graph[next_node_id]["adj_list"]["L"][i]["N"]), int(my_local_graph[next_node_id]["adj_edge_id"]["L"][i]["N"]))
+                    temppath = toppath[1].copy()
+                    temppath.append(item_tuple)
+                    rank.put((toppath[0]+float(length)/float(speed),temppath))
+    
     pathset = set(path)
+    print(pathset)
+    pathes = []
     for path in pathset:
-        dote.append(path[0])
-        dote.append(path[1])
-    doteset = set(dote)
-    for dote in doteset:
         response = dynamo_client.get_item(
-            TableName='table_node',
+            TableName='table_edges',
             Key={
-                "node_id": {"N": str(dote)},
+                "src_node_id": {"N": str(path[0])},
+                "edge_tuple": {"S":'(' + str(path[0])+', '+str(path[1])+', '+str(path[2])+')' },
             },
         )
-        G.add_node(dote, x=float(response['Item']['x']['N']) ,y=float(response['Item']['y']['N']))
 
-    for path in pathset:
-        dictionary_list = edge_table[path]['geometry']['L']
+        dictionary_list = response["Item"]["geometry"]['L']
         if len(dictionary_list) > 0:
             geometry_tup_list = []
             for dictionary in dictionary_list:
@@ -230,41 +253,58 @@ def key_save():
             G.add_edge(path[0],path[1],geometry = geometry_linstr)
         else:
             G.add_edge(path[0],path[1])
-            
+        
+        path_source = path[0]
+        path_source_x = float(my_local_graph[path_source]["x"]["N"])
+        path_source_y = float(my_local_graph[path_source]["y"]["N"])
+        region_id = get_region_id(path_source_x, path_source_y)
+
         response = dynamo_client.get_item(
-            TableName='table_edges',
+            TableName='table_find_nearest_point',
             Key={
-                "src_node_id": {"N": str(path[0])},
-                "edge_tuple": {"S":'(' + str(path[0])+', '+str(path[1])+', '+str(path[2])+')' },
+                "region_id": {"N": str(region_id)},
+                "node_id": {"N": str(path_source) },
             },
             ConsistentRead = True,
         )
-        if float(response['Item']['current_speed']['N']) > 5:
-            newspeed = float(response['Item']['current_speed']['N']) - 5
-            responseput = dynamo_client.put_item(
-                TableName='table_edges',
-                Item={
-                    "src_node_id": {"N": str(path[0])},
-                    "edge_tuple": {"S":'(' + str(path[0])+', '+str(path[1])+', '+str(path[2])+')' },
-                    "length": {"N": response['Item']['length']['N']},
-                    "speed_kph": {"N": response['Item']['speed_kph']['N']},
-                    "current_speed": {"N": str(newspeed)},
-                    "geometry": {"L": response['Item']['geometry']['L']},
-                },
-            )
-    
-    pathes = []
-    for path in pathset:
+
+        found = False
+        for i in range(len(response["Item"]["adj_region"]["L"])):
+            if (int(response["Item"]["adj_list"]["L"][i]["N"]) == path[1] and int(response["Item"]["adj_edge_id"]["L"][i]["N"]) == path[2]):
+                found = True
+                current_speed = float(response["Item"]["adj_current_speed"]["L"][i]["N"])
+                newspeed = current_speed
+                if current_speed > 5:
+                    newspeed = current_speed - 5
+                response["Item"]["adj_current_speed"]["L"][i]["N"] = str(newspeed)
+                next_response = dynamo_client.put_item(
+                    TableName='table_find_nearest_point',
+                    Item={
+                        "region_id": {"N": str(region_id)},
+                        "node_id": {"N": str(path_source)},
+                        "x": response["Item"]["x"],
+                        "y": response["Item"]["y"],
+                        "adj_list": response["Item"]["adj_list"],
+                        "adj_edge_id": response["Item"]["adj_edge_id"],
+                        "adj_region": response["Item"]["adj_region"],
+                        "adj_length": response["Item"]["adj_length"],
+                        "adj_speed_limit": response["Item"]["adj_speed_limit"],
+                        "adj_current_speed": response["Item"]["adj_current_speed"],
+                    },
+                )
+        assert found
         pathes.append(path[0])
         pathes.append(path[1])
         pathes.append(path[2])
+        pathes.append(region_id)
+    
     data = {
         "input": "{  \"path\":  "+ json.dumps(pathes) +" }",
         "stateMachineArn": "arn:aws:states:us-east-1:968434901467:stateMachine:MyStateMachine",
     }
 
     response = requests.post("https://nadcdu8gn4.execute-api.us-east-1.amazonaws.com/prod/execution", data=json.dumps(data))
-
+    
     ns = [50 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
     na = [1 if i_d == source_id or i_d == target_id else 0 for i_d in G.nodes]
     nc = ['#FF7874' if i_d == target_id else '#78DAFF' for i_d in G.nodes]
